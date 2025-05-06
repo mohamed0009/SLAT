@@ -1,0 +1,17 @@
+{% extends "accounts/base_auth.html" %} {% load static %} {% block title %}
+Register {% endblock %} {% block content %}
+<div class="auth-container">
+  <div class="auth-box">
+    <h2>Register</h2>
+    <form method="POST" class="auth-form">
+      {% csrf_token %} {{ form.as_p }}
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-user-plus"></i> Register
+      </button>
+    </form>
+    <div class="auth-links">
+      <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

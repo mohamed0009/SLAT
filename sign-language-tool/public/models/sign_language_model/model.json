@@ -1,0 +1,58 @@
+{
+  "modelTopology": {
+    "class_name": "Sequential",
+    "config": {
+      "name": "sequential",
+      "layers": [
+        {
+          "class_name": "Conv2D",
+          "config": {
+            "filters": 32,
+            "kernel_size": [3, 3],
+            "activation": "relu",
+            "input_shape": [224, 224, 3],
+            "name": "conv2d",
+            "trainable": true
+          }
+        },
+        {
+          "class_name": "MaxPooling2D",
+          "config": {
+            "pool_size": [2, 2],
+            "name": "max_pooling2d",
+            "trainable": true
+          }
+        },
+        {
+          "class_name": "Flatten",
+          "config": {
+            "name": "flatten",
+            "trainable": true
+          }
+        },
+        {
+          "class_name": "Dense",
+          "config": {
+            "units": 26,
+            "activation": "softmax",
+            "name": "dense",
+            "trainable": true
+          }
+        }
+      ]
+    },
+    "keras_version": "2.2.4-tf",
+    "backend": "tensorflow"
+  },
+  "weightsManifest": [
+    {
+      "paths": ["weights.bin"],
+      "weights": [
+        {"name": "conv2d/kernel", "shape": [3, 3, 3, 32], "dtype": "float32"},
+        {"name": "conv2d/bias", "shape": [32], "dtype": "float32"},
+        {"name": "dense/kernel", "shape": [111392, 26], "dtype": "float32"},
+        {"name": "dense/bias", "shape": [26], "dtype": "float32"}
+      ]
+    }
+  ]
+} 

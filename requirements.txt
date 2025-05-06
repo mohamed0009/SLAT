@@ -1,0 +1,10 @@
+django>=3.2,<4.0
+numpy>=1.19.5
+opencv-python>=4.5.3
+tensorflow>=2.6.0
+kagglehub>=0.1.5
+pillow>=8.3.2
+sounddevice>=0.4.4
+python-decouple>=3.5
+scipy>=1.7.3
+mediapipe>=0.8.10 

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SLAT</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/navigation.css' %}" />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="top-navbar">
+      <div class="navbar-container">
+        <div class="navbar-brand">
+          <button id="menuToggle" class="menu-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="brand-logo"></div>
+        </div>
+
+        <div class="navbar-menu">
+          <ul class="nav-links">
+            <li class="nav-item active">
+              <a href="/"><i class="fas fa-home"></i> Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a href="#"><i class="fas fa-chart-line"></i> Analytics</a>
+            </li>
+            <li class="nav-item">
+              <a href="#"><i class="fas fa-history"></i> History</a>
+            </li>
+            <li class="nav-item">
+              <a href="#"><i class="fas fa-cog"></i> Settings</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="navbar-actions">
+          <div class="notification-bell">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge">2</span>
+          </div>
+          <div class="theme-toggle">
+            <i class="fas fa-moon"></i>
+          </div>
+          <div class="user-profile">
+            <img
+              src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff"
+              alt="User"
+            />
+            <span class="user-name">User</span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Side Menu -->
+    <div class="side-menu" id="side-menu">
+      <div class="side-menu-header">
+        <div class="logo">
+          <i class="fas fa-hands-helping"></i>
+          <span class="logo-text">SLAT</span>
+        </div>
+        <button id="closeMenu" class="close-menu">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="menu-search">
+        <div class="search-input-container">
+          <i class="fas fa-search"></i>
+          <input type="text" class="search-input" placeholder="Search..." />
+        </div>
+      </div>
+
+      <div class="menu-categories">
+        <div class="category-header">
+          <span>Main Menu</span>
+        </div>
+        <ul class="menu-items">
+          <li class="menu-item active">
+            <a href="/">
+              <i class="fas fa-home"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="#">
+              <i class="fas fa-chart-line"></i>
+              <span>Analytics</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="#">
+              <i class="fas fa-history"></i>
+              <span>History</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="#">
+              <i class="fas fa-cog"></i>
+              <span>Settings</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="category-header">
+          <span>Tools</span>
+        </div>
+        <ul class="menu-items">
+          <li class="menu-item">
+            <a href="#">
+              <i class="fas fa-video"></i>
+              <span>Recordings</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="#">
+              <i class="fas fa-book"></i>
+              <span>Dictionary</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="#">
+              <i class="fas fa-graduation-cap"></i>
+              <span>Learn</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="menu-footer">
+        <div class="version-info">
+          <span>Version 1.0.0</span>
+        </div>
+        <div class="logout-button">
+          <a href="#">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- App Container -->
+    <div class="app-container">
+      <header class="app-header">
+        <div class="logo-container">
+          <div class="logo">
+            <i class="fas fa-hands-helping"></i>
+            <span class="logo-text">SLAT</span>
+          </div>
+          <p class="logo-subtitle">Sign Language Analysis Tool</p>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <div class="video-container">
+          <div class="video-wrapper">
+            <video id="video" autoplay></video>
+            <div id="handPositionGuide" class="hand-position-guide">
+              <i class="fas fa-hand-paper"></i>
+              <span>Position your hand in the frame</span>
+            </div>
+
+            <div class="video-controls">
+              <button id="startDetectionBtn" class="control-button start">
+                <i class="fas fa-play"></i>
+                <span>Start Detection</span>
+              </button>
+              <button id="endDetectionBtn" class="control-button stop" disabled>
+                <i class="fas fa-stop"></i>
+                <span>Stop Detection</span>
+              </button>
+            </div>
+
+            <div class="camera-status">
+              <div id="statusIndicator" class="status-indicator"></div>
+              <span id="statusText" class="status-text">Initializing...</span>
+            </div>
+          </div>
+          <div class="detection-result">
+            <div class="result-header">
+              <i class="fas fa-hand-paper"></i>
+              <h3>Real-Time Detection Dashboard</h3>
+            </div>
+            <div class="result-content">
+              <div class="data-grid">
+                <div class="data-panel primary">
+                  <div class="panel-header">
+                    <i class="fas fa-hand"></i>
+                    <h4>Current Sign</h4>
+                  </div>
+                  <div class="panel-content">
+                    <span id="result" class="result-text"
+                      >Waiting for detection...</span
+                    >
+                    <div class="confidence-meter">
+                      <div class="progress-bar">
+                        <div
+                          id="confidenceBar"
+                          class="progress"
+                          style="width: 0%"
+                        ></div>
+                      </div>
+                      <span class="confidence-label"
+                        >Confidence: <span id="confidenceValue">0%</span></span
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <div class="data-panel">
+                  <div class="panel-header">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <h4>Performance Metrics</h4>
+                  </div>
+                  <div class="panel-content">
+                    <div class="metric-item">
+                      <span class="metric-label">Detection Time</span>
+                      <span class="metric-value" id="detectionTime">0ms</span>
+                    </div>
+                    <div class="metric-item">
+                      <span class="metric-label">Accuracy</span>
+                      <span class="metric-value" id="accuracy">0%</span>
+                    </div>
+                    <div class="metric-item">
+                      <span class="metric-label">FPS</span>
+                      <span class="metric-value" id="fps">0</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="data-panel">
+                  <div class="panel-header">
+                    <i class="fas fa-chart-line"></i>
+                    <h4>Detection History</h4>
+                  </div>
+                  <div class="panel-content">
+                    <div class="history-list" id="detectionHistory">
+                      <!-- History items will be added here -->
+                    </div>
+                  </div>
+                </div>
+
+                <div class="data-panel">
+                  <div class="panel-header">
+                    <i class="fas fa-cogs"></i>
+                    <h4>System Status</h4>
+                  </div>
+                  <div class="panel-content">
+                    <div class="status-item">
+                      <span class="status-label">Camera</span>
+                      <span class="status-value" id="cameraStatus"
+                        >Initializing</span
+                      >
+                    </div>
+                    <div class="status-item">
+                      <span class="status-label">Model</span>
+                      <span class="status-value" id="modelStatus">Loading</span>
+                    </div>
+                    <div class="status-item">
+                      <span class="status-label">Processing</span>
+                      <span class="status-value" id="processingStatus"
+                        >Idle</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="interaction-panel">
+          <div class="text-section">
+            <div class="section-header">
+              <i class="fas fa-comments"></i>
+              <h2>Conversation</h2>
+            </div>
+            <div class="message-container" id="messageContainer">
+              <!-- Welcome message -->
+              <div class="message-bubble incoming">
+                <div class="message-text">Hello! How can I help you today?</div>
+                <div class="message-time" id="welcomeMessageTime"></div>
+              </div>
+            </div>
+            <div class="input-group">
+              <button id="recordButton" class="record-button">
+                <i class="fas fa-microphone"></i>
+              </button>
+              <input
+                type="text"
+                id="textInput"
+                placeholder="Type your message..."
+                class="text-input"
+              />
+              <button id="sendButton" class="send-button">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </div>
+            <div class="recording-info" style="display: none">
+              <span id="recordingTime" class="recording-time">0:00</span>
+              <div class="recording-indicator">
+                <div class="pulse-ring"></div>
+              </div>
+              <button id="deleteButton" class="control-button delete" disabled>
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Translation Section (New) -->
+          <div class="translation-section">
+            <div class="section-header">
+              <i class="fas fa-language"></i>
+              <h2>Text to Sign Language</h2>
+            </div>
+
+            <!-- Avatar Display Area -->
+            <div class="avatar-container">
+              <div class="avatar-wrapper">
+                <div class="avatar-placeholder">
+                  <i class="fas fa-user-circle"></i>
+                  <span class="avatar-status">Ready to translate</span>
+                </div>
+                <div class="avatar-display" id="avatarDisplay">
+                  <!-- Avatar will be rendered here -->
+                </div>
+              </div>
+
+              <!-- Translation Controls -->
+              <div class="translation-controls">
+                <div class="translation-input-group">
+                  <input
+                    type="text"
+                    class="translation-input"
+                    id="textToTranslate"
+                    placeholder="Enter text to translate to sign language..."
+                  />
+                  <button class="translate-button" id="translateButton">
+                    <i class="fas fa-sign-language"></i>
+                    <span>Translate</span>
+                  </button>
+                </div>
+                <div class="translation-options">
+                  <div class="option-item">
+                    <label for="translationSpeed">Speed:</label>
+                    <div class="slider-container">
+                      <input
+                        type="range"
+                        id="translationSpeed"
+                        min="0.5"
+                        max="2"
+                        step="0.1"
+                        value="1"
+                      />
+                      <span class="slider-value">1x</span>
+                    </div>
+                  </div>
+                  <div class="translation-history">
+                    <h4>Recent Translations</h4>
+                    <ul class="history-list" id="translationHistoryList">
+                      <!-- Translation history will appear here -->
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <!-- End of app-container -->
+
+    <!-- Creative Footer with improved structure -->
+    <footer class="app-footer">
+      <div class="footer-waves">
+        <div class="wave wave1"></div>
+        <div class="wave wave2"></div>
+        <div class="wave wave3"></div>
+      </div>
+      <div class="footer-content">
+        <div class="footer-logo">
+          <i class="fas fa-hands-helping"></i>
+          <span>SLAT</span>
+        </div>
+        <div class="footer-links">
+          <div class="footer-section">
+            <h4>Resources</h4>
+            <ul>
+              <li>
+                <a href="#"><i class="fas fa-book"></i> Documentation</a>
+              </li>
+              <li>
+                <a href="#"><i class="fas fa-graduation-cap"></i> Tutorials</a>
+              </li>
+              <li>
+                <a href="#"><i class="fas fa-question-circle"></i> FAQ</a>
+              </li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h4>Connect</h4>
+            <ul>
+              <li>
+                <a href="#"><i class="fab fa-github"></i> GitHub</a>
+              </li>
+              <li>
+                <a href="#"><i class="fab fa-twitter"></i> Twitter</a>
+              </li>
+              <li>
+                <a href="#"><i class="fas fa-envelope"></i> Contact</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-info">
+          <div class="footer-stats">
+            <div class="stat-item">
+              <span class="stat-value">99.9%</span>
+              <span class="stat-label">Accuracy</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">30ms</span>
+              <span class="stat-label">Response Time</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">5K+</span>
+              <span class="stat-label">Users</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>
+          © 2023-<span id="currentYear"></span> Sign Language Analysis Tool. All
+          rights reserved. Made with <span class="heart">♥</span> for
+          accessibility
+        </p>
+        <div class="footer-theme-toggle">
+          <i class="fas fa-moon"></i>
+          <span>Switch Theme</span>
+        </div>
+      </div>
+    </footer>
+
+    <script src="{% static 'js/script.js' %}"></script>
+    <script>
+      // Set current year in copyright
+      document.getElementById("currentYear").textContent =
+        new Date().getFullYear();
+    </script>
+    <script src="{% static 'js/detection.js' %}"></script>
+    <script src="{% static 'js/navigation.js' %}"></script>
+    <script src="{% static 'js/translation.js' %}"></script>
+  </body>
+</html>

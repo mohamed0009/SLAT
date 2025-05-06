@@ -1,0 +1,292 @@
+/* Analytics Page Styles */
+.analytics-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.analytics-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.analytics-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+}
+
+.analytics-numbers {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.analytics-label {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.chart-container {
+  background: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  position: relative;
+  margin-bottom: 20px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.chart-header {
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.chart-canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.chart-wrapper {
+  position: relative;
+  height: 350px;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+/* History Page Styles */
+.history-card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.history-header {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 15px 15px 0 0;
+  padding: 1.5rem;
+}
+
+.history-table {
+  margin: 0;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.history-table th {
+  background: #f8f9fa;
+  color: #6c757d;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.history-table td {
+  vertical-align: middle;
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.history-gesture {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.progress-wrapper {
+  width: 100%;
+  max-width: 200px;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.25rem;
+}
+
+.progress {
+  height: 8px;
+  background-color: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+}
+
+.progress-bar {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.progress-percentage {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6c757d;
+}
+
+/* Settings Page Styles */
+.settings-card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.settings-header {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 1rem;
+}
+
+.settings-header h6 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.form-control-label {
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.form-range {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.form-range::-webkit-slider-thumb {
+  background: var(--primary-color);
+}
+
+.form-control {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.form-check-input {
+  width: 2.5rem;
+  height: 1.25rem;
+  margin-right: 0.5rem;
+}
+
+.form-check-label {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.btn-save {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-save:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+/* Card body adjustments */
+.card-body {
+  padding: 1.5rem;
+}
+
+.card-body.px-0 {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .analytics-card,
+  .chart-container,
+  .history-card,
+  .settings-card {
+    margin-bottom: 1.5rem;
+  }
+
+  .settings-body {
+    padding: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .chart-wrapper {
+    height: 300px;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .analytics-card,
+  .chart-container,
+  .history-card,
+  .settings-card {
+    background: #1a1a1a;
+    color: #ffffff;
+  }
+
+  .analytics-numbers,
+  .history-gesture,
+  .form-control-label {
+    color: #ffffff;
+  }
+
+  .analytics-label,
+  .history-table th {
+    color: #adb5bd;
+  }
+
+  .form-control,
+  .form-range {
+    background-color: #2d2d2d;
+    border-color: #3d3d3d;
+    color: #ffffff;
+  }
+
+  .form-control:focus,
+  .form-range:focus {
+    background-color: #2d2d2d;
+    border-color: #6366f1;
+  }
+
+  .progress {
+    background-color: #3d3d3d;
+  }
+}

@@ -1,0 +1,223 @@
+{% extends 'detection/index.html' %} {% load static %} {% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-xl-3 col-sm-6 mb-4">
+      <div class="card analytics-card">
+        <div class="card-body p-3">
+          <div class="row">
+            <div class="col-8">
+              <div class="numbers">
+                <p class="analytics-label">Total Detections</p>
+                <h5 class="analytics-numbers">{{ total_detections }}</h5>
+              </div>
+            </div>
+            <div class="col-4 text-end">
+              <div class="analytics-icon">
+                <i class="fas fa-hand-paper"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-sm-6 mb-4">
+      <div class="card analytics-card">
+        <div class="card-body p-3">
+          <div class="row">
+            <div class="col-8">
+              <div class="numbers">
+                <p class="analytics-label">Accuracy Rate</p>
+                <h5 class="analytics-numbers">
+                  {{ user_analytics.accuracy_rate|floatformat:1 }}%
+                </h5>
+              </div>
+            </div>
+            <div class="col-4 text-end">
+              <div class="analytics-icon">
+                <i class="fas fa-chart-line"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-lg-7 mb-4">
+      <div class="chart-container">
+        <div class="chart-header">
+          <h6>Detection Accuracy Over Time</h6>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="accuracyChart" class="chart-canvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5 mb-4">
+      <div class="chart-container">
+        <div class="chart-header">
+          <h6>Most Common Gestures</h6>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="gesturesChart" class="chart-canvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Prepare sample data if real data is not available
+    let accuracyData = [];
+    let gesturesData = [];
+
+    try {
+      // Try to parse the data from the server
+      accuracyData = JSON.parse("{{ accuracy_data|escapejs }}");
+      gesturesData = JSON.parse("{{ common_gestures|escapejs }}");
+    } catch (e) {
+      console.error("Error parsing chart data:", e);
+
+      // Sample accuracy data if parsing fails
+      accuracyData = [
+        { timestamp: "2023-06-01", confidence: 0.82 },
+        { timestamp: "2023-06-02", confidence: 0.85 },
+        { timestamp: "2023-06-03", confidence: 0.89 },
+        { timestamp: "2023-06-04", confidence: 0.91 },
+        { timestamp: "2023-06-05", confidence: 0.87 },
+      ];
+
+      // Sample gesture data if parsing fails
+      gesturesData = [
+        { gesture: "Hello", count: 25 },
+        { gesture: "Thank You", count: 18 },
+        { gesture: "Yes", count: 15 },
+        { gesture: "No", count: 12 },
+        { gesture: "Please", count: 8 },
+      ];
+    }
+
+    // Set a timeout to ensure DOM is fully loaded and sized
+    setTimeout(() => {
+      // Render accuracy chart
+      const accuracyCtx = document
+        .getElementById("accuracyChart")
+        .getContext("2d");
+      new Chart(accuracyCtx, {
+        type: "line",
+        data: {
+          labels: accuracyData.map((d) =>
+            new Date(d.timestamp).toLocaleDateString()
+          ),
+          datasets: [
+            {
+              label: "Detection Accuracy",
+              data: accuracyData.map((d) => d.confidence * 100),
+              borderColor: "rgb(99, 102, 241)",
+              backgroundColor: "rgba(99, 102, 241, 0.1)",
+              tension: 0.1,
+              fill: true,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              grid: {
+                color: "rgba(0, 0, 0, 0.05)",
+              },
+            },
+            x: {
+              grid: {
+                display: false,
+              },
+            },
+          },
+          plugins: {
+            legend: {
+              display: false,
+            },
+            tooltip: {
+              backgroundColor: "rgba(0, 0, 0, 0.7)",
+              titleFont: {
+                size: 14,
+              },
+              bodyFont: {
+                size: 13,
+              },
+              padding: 10,
+              displayColors: false,
+            },
+          },
+          layout: {
+            padding: {
+              top: 5,
+              right: 10,
+              bottom: 5,
+              left: 10,
+            },
+          },
+        },
+      });
+
+      // Render gestures chart
+      const gesturesCtx = document
+        .getElementById("gesturesChart")
+        .getContext("2d");
+      new Chart(gesturesCtx, {
+        type: "doughnut",
+        data: {
+          labels: gesturesData.map((d) => d.gesture),
+          datasets: [
+            {
+              data: gesturesData.map((d) => d.count),
+              backgroundColor: [
+                "#6366f1",
+                "#4f46e5",
+                "#4338ca",
+                "#3730a3",
+                "#312e81",
+              ],
+              borderWidth: 0,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "right",
+              labels: {
+                padding: 20,
+                usePointStyle: true,
+                pointStyle: "circle",
+              },
+            },
+            tooltip: {
+              backgroundColor: "rgba(0, 0, 0, 0.7)",
+              titleFont: {
+                size: 14,
+              },
+              bodyFont: {
+                size: 13,
+              },
+              padding: 10,
+            },
+          },
+          cutout: "70%",
+        },
+      });
+    }, 100);
+  });
+</script>
+{% endblock %}

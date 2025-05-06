@@ -1,0 +1,3 @@
+// This is a placeholder for the binary weights file.
+// In a real application, you would need to train a model and export the weights.
+// For testing purposes, we'll use a dummy file. 

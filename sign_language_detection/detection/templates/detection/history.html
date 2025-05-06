@@ -1,0 +1,112 @@
+{% extends 'detection/index.html' %} {% load static %} {% block content %}
+<div class="container-fluid py-4">
+  <div class="history-card">
+    <div class="history-header">
+      <div class="row">
+        <div class="col-lg-6 col-7">
+          <h6>Detection History</h6>
+        </div>
+        <div class="col-lg-6 col-5 my-auto text-end">
+          <div class="dropdown float-end">
+            <button
+              class="btn bg-gradient-primary dropdown-toggle"
+              type="button"
+              id="dropdownMenuButton"
+              data-bs-toggle="dropdown"
+            >
+              Filter
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <li>
+                <a class="dropdown-item" href="?filter=today">Today</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="?filter=week">This Week</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="?filter=month">This Month</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body px-0 pb-2">
+      <div class="table-responsive">
+        <table class="table history-table align-items-center mb-0">
+          <thead>
+            <tr>
+              <th>Gesture</th>
+              <th>Confidence</th>
+              <th class="text-center">Date</th>
+              <th class="text-center">Time</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for record in history %}
+            <tr>
+              <td>
+                <div class="d-flex px-2 py-1">
+                  <div class="d-flex flex-column justify-content-center">
+                    <h6 class="history-gesture mb-0">{{ record.gesture }}</h6>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="progress-wrapper">
+                  <div class="progress-info">
+                    <span class="progress-percentage"
+                      >{{ record.confidence|floatformat:2 }}%</span
+                    >
+                  </div>
+                  <div class="progress">
+                    <div
+                      class="progress-bar"
+                      style="width: {{ record.confidence }}%"
+                    ></div>
+                  </div>
+                </div>
+              </td>
+              <td class="align-middle text-center">
+                <span class="text-secondary text-xs font-weight-bold">
+                  {{ record.timestamp|date:"Y-m-d" }}
+                </span>
+              </td>
+              <td class="align-middle text-center">
+                <span class="text-secondary text-xs font-weight-bold">
+                  {{ record.timestamp|time:"H:i:s" }}
+                </span>
+              </td>
+              <td class="align-middle">
+                {% if record.video_clip %}
+                <a
+                  href="{{ record.video_clip.url }}"
+                  class="text-secondary font-weight-bold text-xs"
+                  target="_blank"
+                >
+                  View Clip
+                </a>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center">
+                <p class="text-sm mb-0">No detection history found.</p>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Initialize any necessary components
+  });
+</script>
+{% endblock %}

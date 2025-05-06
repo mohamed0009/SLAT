@@ -1,0 +1,130 @@
+{% extends 'detection/index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="settings-card">
+                <div class="settings-header">
+                    <h6>Application Settings</h6>
+                </div>
+                <div class="settings-body">
+                    <form method="post" id="settingsForm">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-control-label">Detection Sensitivity</label>
+                                    <input type="range" class="form-range" name="detection_sensitivity" 
+                                           min="0" max="1" step="0.1" value="{{ settings.detection_sensitivity }}"
+                                           oninput="this.nextElementSibling.value = this.value">
+                                    <output>{{ settings.detection_sensitivity }}</output>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-control-label">Camera Device</label>
+                                    <select class="form-control" name="camera_device">
+                                        <option value="0" {% if settings.camera_device == '0' %}selected{% endif %}>Default Camera</option>
+                                        <option value="1" {% if settings.camera_device == '1' %}selected{% endif %}>Secondary Camera</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-control-label">Preferred Language</label>
+                                    <select class="form-control" name="preferred_language">
+                                        <option value="en" {% if settings.preferred_language == 'en' %}selected{% endif %}>English</option>
+                                        <option value="es" {% if settings.preferred_language == 'es' %}selected{% endif %}>Spanish</option>
+                                        <option value="fr" {% if settings.preferred_language == 'fr' %}selected{% endif %}>French</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="enable_sound" 
+                                           id="enableSound" {% if settings.enable_sound %}checked{% endif %}>
+                                    <label class="form-check-label" for="enableSound">Enable Sound Feedback</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="enable_notifications" 
+                                           id="enableNotifications" {% if settings.enable_notifications %}checked{% endif %}>
+                                    <label class="form-check-label" for="enableNotifications">Enable Notifications</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="dark_mode" 
+                                           id="darkMode" {% if settings.dark_mode %}checked{% endif %}>
+                                    <label class="form-check-label" for="darkMode">Dark Mode</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-save">Save Settings</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('settingsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = {};
+        formData.forEach((value, key) => {
+            if (key === 'detection_sensitivity') {
+                data[key] = parseFloat(value);
+            } else if (key === 'enable_sound' || key === 'enable_notifications' || key === 'dark_mode') {
+                data[key] = value === 'on';
+            } else {
+                data[key] = value;
+            }
+        });
+
+        fetch('{% url "update_settings" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Settings saved successfully!');
+            } else {
+                alert('Error saving settings. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error saving settings. Please try again.');
+        });
+    });
+</script>
+{% endblock %} 
