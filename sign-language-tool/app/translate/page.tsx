@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Slider } from "@/components/ui/slider"
 import { PageHeader } from "@/components/page-header"
-import { Mic, Play, Square, HandMetal, Camera, RefreshCw, Loader2, Save, Settings } from "lucide-react"
+import { Mic, Play, Square, HandMetal, Camera, RefreshCw, Loader2, Save, Settings, History } from "lucide-react"
 import { Avatar } from "@/components/avatar"
 import { ImprovedAvatar } from "@/components/improved-avatar"
 import {
@@ -24,6 +24,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
 
 // Sample sign language dictionary for demonstration
 const signDictionary = [
@@ -76,6 +77,7 @@ export default function TranslatePage() {
   ])
   const [newAvatarName, setNewAvatarName] = useState("")
   const [suggestions, setSuggestions] = useState<string[]>([])
+  const [inputMode, setInputMode] = useState<"text" | "voice">("text")
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -348,44 +350,51 @@ export default function TranslatePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Avatar Section */}
         <div className="lg:col-span-2">
-          <Card className="overflow-hidden">
-            <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 flex items-center justify-between">
+          <Card className="overflow-hidden shadow-md border border-indigo-100">
+            <div className="p-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <HandMetal className="h-5 w-5 text-primary" />
+                <HandMetal className="h-5 w-5" />
                 <h2 className="text-lg font-medium">Your Sign Language Avatar</h2>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowSettings(true)}
-                className="flex items-center gap-1"
+                className="text-white hover:bg-white/20 flex items-center gap-1"
               >
                 <Settings className="h-4 w-4" />
                 <span className="sr-only md:not-sr-only">Settings</span>
               </Button>
             </div>
 
-            <div className="p-6">
+            <div className="p-6 bg-gradient-to-b from-indigo-50/50 to-white">
               {captureMode ? (
                 <div className="space-y-4">
-                  <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                  <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden shadow-inner">
                     <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
                     <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4">
-                      <Button onClick={captureAvatar} className="bg-primary hover:bg-primary/90">
+                      <Button 
+                        onClick={captureAvatar} 
+                        className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md transition-all duration-200"
+                      >
                         <Camera className="h-4 w-4 mr-2" />
                         Capture Avatar
                       </Button>
-                      <Button variant="outline" onClick={() => setCaptureMode(false)}>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setCaptureMode(false)}
+                        className="border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                      >
                         Cancel
                       </Button>
                     </div>
                   </div>
-                  <p className="text-center text-gray-500">Position yourself in the frame and click "Capture Avatar"</p>
+                  <p className="text-center text-indigo-600">Position yourself in the frame and click "Capture Avatar"</p>
                   <canvas ref={canvasRef} className="hidden" />
                 </div>
               ) : (
                 <div className="flex flex-col items-center">
-                  <div className="mb-6 w-full max-w-md aspect-square bg-gray-100 rounded-lg flex items-center justify-center relative overflow-hidden">
+                  <div className="mb-6 w-full max-w-md aspect-square bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg flex items-center justify-center relative overflow-hidden shadow-md">
                     {avatarReady ? (
                       useImprovedAvatar ? (
                         <ImprovedAvatar
@@ -404,56 +413,69 @@ export default function TranslatePage() {
                     ) : (
                       <div className="text-center p-8">
                         <div className="mb-4 flex justify-center">
-                          <HandMetal className="h-16 w-16 text-gray-300" />
+                          <HandMetal className="h-16 w-16 text-indigo-300" />
                         </div>
-                        <h3 className="text-lg font-medium mb-2">Create Your Avatar</h3>
-                        <p className="text-gray-500 mb-6">
+                        <h3 className="text-lg font-medium mb-2 text-indigo-900">Create Your Avatar</h3>
+                        <p className="text-indigo-600 mb-6">
                           Use your webcam to create a personalized sign language avatar
                         </p>
-                        <Button onClick={() => setCaptureMode(true)} className="bg-primary hover:bg-primary/90">
+                        <Button 
+                          onClick={() => setCaptureMode(true)} 
+                          className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md transition-all duration-200"
+                        >
                           <Camera className="h-4 w-4 mr-2" />
                           Create Avatar
                         </Button>
                       </div>
+                    )}
+                    
+                    {isTranslating && (
+                      <Badge className="absolute top-3 right-3 bg-gradient-to-r from-indigo-600 to-purple-600 animate-pulse">
+                        Translating...
+                      </Badge>
                     )}
                   </div>
 
                   {avatarReady && (
                     <div className="w-full max-w-md space-y-4">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">Playback Speed: {playbackSpeed}x</span>
+                        <span className="text-sm font-medium text-indigo-900">Playback Speed: {playbackSpeed}x</span>
                         <div className="flex gap-2">
                           <Dialog>
                             <DialogTrigger asChild>
-                              <Button variant="outline" size="sm" className="flex items-center gap-1">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="flex items-center gap-1 border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                              >
                                 <Save className="h-3 w-3" />
                                 <span className="hidden sm:inline">Save Avatar</span>
                               </Button>
                             </DialogTrigger>
-                            <DialogContent>
+                            <DialogContent className="border border-indigo-100 shadow-lg">
                               <DialogHeader>
-                                <DialogTitle>Save Avatar</DialogTitle>
-                                <DialogDescription>
+                                <DialogTitle className="text-indigo-900">Save Avatar</DialogTitle>
+                                <DialogDescription className="text-indigo-600">
                                   Give your avatar a name to save it for future use.
                                 </DialogDescription>
                               </DialogHeader>
                               <div className="grid gap-4 py-4">
                                 <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="avatar-name" className="text-right">
+                                  <Label htmlFor="avatar-name" className="text-right text-indigo-700">
                                     Name
                                   </Label>
                                   <Input
                                     id="avatar-name"
                                     value={newAvatarName}
                                     onChange={(e) => setNewAvatarName(e.target.value)}
-                                    className="col-span-3"
+                                    className="col-span-3 border-indigo-200 focus:ring-indigo-500"
                                     placeholder="My Avatar"
                                   />
                                 </div>
                                 <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label className="text-right">Preview</Label>
+                                  <Label className="text-right text-indigo-700">Preview</Label>
                                   <div className="col-span-3">
-                                    <div className="w-16 h-16 rounded-full overflow-hidden border border-gray-200">
+                                    <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-indigo-200 shadow-sm">
                                       <img
                                         src={avatarImage || ""}
                                         alt="Avatar preview"
@@ -464,7 +486,12 @@ export default function TranslatePage() {
                                 </div>
                               </div>
                               <DialogFooter>
-                                <Button onClick={saveCurrentAvatar}>Save Avatar</Button>
+                                <Button 
+                                  onClick={saveCurrentAvatar}
+                                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                                >
+                                  Save Avatar
+                                </Button>
                               </DialogFooter>
                             </DialogContent>
                           </Dialog>
@@ -473,7 +500,7 @@ export default function TranslatePage() {
                             variant="outline"
                             size="sm"
                             onClick={() => setCaptureMode(true)}
-                            className="flex items-center gap-1"
+                            className="flex items-center gap-1 border-indigo-200 text-indigo-700 hover:bg-indigo-50"
                           >
                             <RefreshCw className="h-3 w-3" />
                             <span className="hidden sm:inline">Recapture</span>
@@ -486,7 +513,13 @@ export default function TranslatePage() {
                         max={2}
                         step={0.1}
                         onValueChange={(value) => setPlaybackSpeed(value[0])}
+                        className="py-2"
                       />
+                      <div className="flex justify-between text-xs text-indigo-500">
+                        <span>Slower (0.5x)</span>
+                        <span>Normal (1x)</span>
+                        <span>Faster (2x)</span>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -497,16 +530,31 @@ export default function TranslatePage() {
 
         {/* Translation Controls */}
         <div>
-          <Card>
-            <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50">
+          <Card className="shadow-md border border-indigo-100">
+            <div className="p-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
               <h2 className="text-lg font-medium">Translation Controls</h2>
             </div>
 
-            <div className="p-6">
-              <Tabs defaultValue="text">
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="text">Text Input</TabsTrigger>
-                  <TabsTrigger value="voice">Voice Input</TabsTrigger>
+            <div className="p-6 bg-gradient-to-b from-indigo-50/50 to-white">
+              <Tabs 
+                defaultValue="text" 
+                value={inputMode}
+                onValueChange={(value) => setInputMode(value as "text" | "voice")}
+                className="w-full"
+              >
+                <TabsList className="grid w-full grid-cols-2 mb-6 bg-indigo-100/70">
+                  <TabsTrigger 
+                    value="text"
+                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white"
+                  >
+                    Text Input
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="voice"
+                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white"
+                  >
+                    Voice Input
+                  </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="text" className="space-y-4">
@@ -516,13 +564,14 @@ export default function TranslatePage() {
                         placeholder="Enter text to translate to sign language..."
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
+                        className="border-indigo-200 focus:ring-indigo-500"
                       />
                       {suggestions.length > 0 && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-indigo-200 rounded-md shadow-lg">
                           {suggestions.map((suggestion, index) => (
                             <div
                               key={index}
-                              className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                              className="px-4 py-2 hover:bg-indigo-50 cursor-pointer text-indigo-700"
                               onClick={() => {
                                 setInputText(suggestion)
                                 setSuggestions([])
@@ -536,7 +585,7 @@ export default function TranslatePage() {
                     </div>
                     <Button
                       onClick={translateText}
-                      className="w-full bg-primary hover:bg-primary/90"
+                      className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md transition-all duration-200"
                       disabled={!avatarReady || isTranslating || !inputText.trim()}
                     >
                       {isTranslating ? (
@@ -559,7 +608,11 @@ export default function TranslatePage() {
                     <div className="relative">
                       <Button
                         size="lg"
-                        className={`rounded-full h-16 w-16 ${isRecording ? "bg-red-500 hover:bg-red-600" : "bg-primary hover:bg-primary/90"}`}
+                        className={`rounded-full h-16 w-16 shadow-md transition-all duration-200 ${
+                          isRecording 
+                            ? "bg-red-500 hover:bg-red-600" 
+                            : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                        }`}
                         onClick={isRecording ? stopRecording : startRecording}
                       >
                         {isRecording ? <Square className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
@@ -573,30 +626,36 @@ export default function TranslatePage() {
                   </div>
 
                   {isRecording && (
-                    <div className="text-center text-gray-500">Recording... {formatTime(recordingTime)}</div>
+                    <div className="text-center text-indigo-600 font-medium">Recording... {formatTime(recordingTime)}</div>
                   )}
 
-                  <div className="text-center text-sm text-gray-500">
+                  <div className="text-center text-sm text-indigo-600">
                     {isRecording ? "Tap to stop recording" : "Tap to start recording"}
                   </div>
 
                   {/* Add fallback button */}
                   <div className="text-center mt-2">
-                    <Button variant="outline" size="sm" onClick={simulateRecording} disabled={isRecording}>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={simulateRecording} 
+                      disabled={isRecording}
+                      className="border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                    >
                       Simulate Voice Input
                     </Button>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-indigo-500 mt-1">
                       If microphone access isn't working, use this button instead
                     </p>
                   </div>
 
                   {inputText && (
-                    <div className="mt-4 p-3 bg-gray-50 rounded-md">
-                      <p className="text-sm font-medium mb-1">Recognized Speech:</p>
-                      <p className="text-gray-700">{inputText}</p>
+                    <div className="mt-4 p-3 bg-indigo-50 rounded-md border border-indigo-100 shadow-sm">
+                      <p className="text-sm font-medium mb-1 text-indigo-900">Recognized Speech:</p>
+                      <p className="text-indigo-700">{inputText}</p>
                       <Button
                         onClick={translateText}
-                        className="w-full mt-3 bg-primary hover:bg-primary/90"
+                        className="w-full mt-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md transition-all duration-200"
                         disabled={!avatarReady || isTranslating || inputText === "Processing your speech..."}
                       >
                         {isTranslating ? (
@@ -618,27 +677,41 @@ export default function TranslatePage() {
 
               {/* Recent Translations */}
               <div className="mt-8">
-                <h3 className="text-sm font-medium mb-2">Recent Translations</h3>
+                <div className="flex items-center gap-2 mb-3">
+                  <History className="h-4 w-4 text-indigo-600" />
+                  <h3 className="text-sm font-medium text-indigo-900">Recent Translations</h3>
+                </div>
                 {recentTranslations.length > 0 ? (
-                  <ul className="space-y-2">
+                  <ul className="space-y-2 max-h-[250px] overflow-y-auto pr-1">
                     {recentTranslations.map((text, index) => (
                       <li key={index} className="group">
                         <Button
                           variant="ghost"
-                          className="w-full justify-between text-left font-normal h-auto py-2"
+                          className="w-full justify-between text-left font-normal h-auto py-2 text-indigo-700 hover:bg-indigo-50 border border-transparent hover:border-indigo-100 rounded-md"
                           onClick={() => {
                             setInputText(text)
                             translateText()
                           }}
                         >
                           <span className="truncate">{text}</span>
-                          <Play className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Badge className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200">Use</Badge>
+                            <Play className="h-4 w-4 text-indigo-600" />
+                          </div>
                         </Button>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <div className="text-center text-sm text-gray-500 py-4">No recent translations</div>
+                  <div className="text-center p-8 bg-indigo-50/50 rounded-lg border border-dashed border-indigo-200">
+                    <div className="mb-2 flex justify-center">
+                      <History className="h-10 w-10 text-indigo-300" />
+                    </div>
+                    <p className="text-indigo-600 text-sm">No recent translations</p>
+                    <p className="text-xs text-indigo-500 mt-1">
+                      Your translation history will appear here
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
@@ -648,22 +721,24 @@ export default function TranslatePage() {
 
       {/* Settings Dialog */}
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Avatar Settings</DialogTitle>
-            <DialogDescription>Customize your sign language avatar and translation settings</DialogDescription>
+        <DialogContent className="sm:max-w-[500px] border border-indigo-100 shadow-lg">
+          <DialogHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 -m-6 mb-6 rounded-t-lg">
+            <DialogTitle className="text-indigo-900">Avatar Settings</DialogTitle>
+            <DialogDescription className="text-indigo-600">
+              Customize your sign language avatar and translation settings
+            </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-6 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="avatar-type" className="text-right">
+              <Label htmlFor="avatar-type" className="text-right text-indigo-700">
                 Avatar Type
               </Label>
               <Select value={avatarType} onValueChange={(value) => setAvatarType(value as "2d" | "3d")}>
-                <SelectTrigger className="col-span-3">
+                <SelectTrigger className="col-span-3 border-indigo-200">
                   <SelectValue placeholder="Select avatar type" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="border-indigo-200">
                   <SelectItem value="2d">2D Avatar</SelectItem>
                   <SelectItem value="3d">3D Avatar (Coming Soon)</SelectItem>
                 </SelectContent>
@@ -671,24 +746,24 @@ export default function TranslatePage() {
             </div>
 
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="use-improved" className="text-right">
+              <Label htmlFor="use-improved" className="text-right text-indigo-700">
                 Use Enhanced Avatar
               </Label>
               <div className="col-span-3 flex items-center space-x-2">
                 <Switch id="use-improved" checked={useImprovedAvatar} onCheckedChange={setUseImprovedAvatar} />
-                <Label htmlFor="use-improved">{useImprovedAvatar ? "Enhanced" : "Basic"}</Label>
+                <Label htmlFor="use-improved" className="text-indigo-700">{useImprovedAvatar ? "Enhanced" : "Basic"}</Label>
               </div>
             </div>
 
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="sign-language" className="text-right">
+              <Label htmlFor="sign-language" className="text-right text-indigo-700">
                 Sign Language
               </Label>
               <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
-                <SelectTrigger className="col-span-3">
+                <SelectTrigger className="col-span-3 border-indigo-200">
                   <SelectValue placeholder="Select sign language" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="border-indigo-200">
                   <SelectItem value="asl">American Sign Language (ASL)</SelectItem>
                   <SelectItem value="bsl">British Sign Language (BSL)</SelectItem>
                   <SelectItem value="lsf">French Sign Language (LSF)</SelectItem>
@@ -698,7 +773,7 @@ export default function TranslatePage() {
             </div>
 
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="recognition-sensitivity" className="text-right">
+              <Label htmlFor="recognition-sensitivity" className="text-right text-indigo-700">
                 Recognition Sensitivity
               </Label>
               <div className="col-span-3 space-y-2">
@@ -709,8 +784,9 @@ export default function TranslatePage() {
                   max={100}
                   step={1}
                   onValueChange={(value) => setRecognitionSensitivity(value[0])}
+                  className="py-2"
                 />
-                <div className="flex justify-between text-xs text-gray-500">
+                <div className="flex justify-between text-xs text-indigo-500">
                   <span>Low</span>
                   <span>{recognitionSensitivity}%</span>
                   <span>High</span>
@@ -719,16 +795,22 @@ export default function TranslatePage() {
             </div>
 
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="avatar-upload" className="text-right">
+              <Label htmlFor="avatar-upload" className="text-right text-indigo-700">
                 Upload Avatar
               </Label>
               <div className="col-span-3">
-                <Input id="avatar-upload" type="file" accept="image/*" onChange={handleFileUpload} />
+                <Input 
+                  id="avatar-upload" 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleFileUpload}
+                  className="border-indigo-200 focus:ring-indigo-500" 
+                />
               </div>
             </div>
 
             <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="saved-avatars" className="text-right pt-2">
+              <Label htmlFor="saved-avatars" className="text-right pt-2 text-indigo-700">
                 Saved Avatars
               </Label>
               <div className="col-span-3">
@@ -736,11 +818,15 @@ export default function TranslatePage() {
                   {savedAvatars.map((avatar, index) => (
                     <div
                       key={index}
-                      className="flex flex-col items-center cursor-pointer"
+                      className="flex flex-col items-center cursor-pointer hover:scale-105 transition-transform duration-200"
                       onClick={() => setAvatarImage(avatar.url)}
                     >
                       <div
-                        className={`w-16 h-16 rounded-full overflow-hidden border-2 ${avatarImage === avatar.url ? "border-primary" : "border-gray-200"}`}
+                        className={`w-16 h-16 rounded-full overflow-hidden border-2 ${
+                          avatarImage === avatar.url 
+                            ? "border-indigo-600 ring-2 ring-purple-300" 
+                            : "border-indigo-200"
+                        } shadow-sm`}
                       >
                         <img
                           src={avatar.url || "/placeholder.svg"}
@@ -748,7 +834,7 @@ export default function TranslatePage() {
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <span className="text-xs mt-1 text-center">{avatar.name}</span>
+                      <span className="text-xs mt-1 text-center text-indigo-700">{avatar.name}</span>
                     </div>
                   ))}
                 </div>
@@ -757,7 +843,12 @@ export default function TranslatePage() {
           </div>
 
           <DialogFooter>
-            <Button onClick={() => setShowSettings(false)}>Save Changes</Button>
+            <Button 
+              onClick={() => setShowSettings(false)}
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+            >
+              Save Changes
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
