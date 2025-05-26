@@ -1,5 +1,6 @@
 {
 	"dependencies": {
+		"@mediapipe/hands": "^0.4.1675469240",
 		"@tensorflow/tfjs": "^4.22.0",
 		"@tensorflow/tfjs-backend-webgl": "^4.22.0",
 		"@types/bcrypt": "^5.0.2",

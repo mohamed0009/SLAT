@@ -6,6 +6,9 @@ declare global {
 
 import { simpleHandDetection } from './simple-hand-detection';
 
+// Import MediaPipe directly - will use the installed package
+import * as mpHands from '@mediapipe/hands';
+
 interface HandLandmark {
   x: number;
   y: number;
@@ -22,6 +25,7 @@ interface MediaPipeError {
   type: 'INITIALIZATION_FAILED' | 'LOADING_FAILED' | 'DETECTION_FAILED' | 'NETWORK_ERROR';
   message: string;
   originalError?: any;
+  timestamp?: number;
 }
 
 class MediaPipeService {
@@ -33,6 +37,7 @@ class MediaPipeService {
   private maxInitializationAttempts: number = 3;
   private lastError: MediaPipeError | null = null;
   private fallbackMode: boolean = false;
+  private errorCount: number = 0;
 
   private constructor() {}
 
@@ -70,38 +75,51 @@ class MediaPipeService {
         throw new Error('MediaPipe requires browser environment');
       }
 
-      // Load MediaPipe via CDN if not already loaded
-      if (!window.mediapipe) {
-        console.log('📦 Loading MediaPipe from CDN...');
-        await this.loadMediaPipe();
-      }
-
-      // If still not loaded, try alternative loading method
-      if (!window.mediapipe) {
-        console.log('🔄 Trying alternative MediaPipe loading...');
-        await this.loadMediaPipeAlternative();
-      }
-
-      // Verify MediaPipe is properly loaded
-      if (!window.mediapipe || !window.mediapipe.Hands) {
-        throw new Error('MediaPipe Hands not available after loading');
-      }
-
       console.log('🤖 Creating MediaPipe Hands instance...');
-      // Initialize Hands with error handling
-      this.hands = new window.mediapipe.Hands({
-        locateFile: (file: string) => {
-          // Use unpkg for model files
-          return `https://unpkg.com/@mediapipe/hands@0.4.1675469240/${file}`;
+      
+      try {
+        // Try to use the directly imported package first
+        this.hands = new mpHands.Hands({
+          locateFile: (file: string) => {
+            return `node_modules/@mediapipe/hands/${file}`;
+          }
+        });
+        console.log('✅ MediaPipe Hands created from local package');
+      } catch (localError) {
+        console.warn('⚠️ Failed to load MediaPipe from local package:', localError);
+        
+        // Fallback to global MediaPipe if available
+        if (window.mediapipe && window.mediapipe.Hands) {
+          this.hands = new window.mediapipe.Hands({
+            locateFile: (file: string) => {
+              return `https://unpkg.com/@mediapipe/hands@0.4.1675469240/${file}`;
+            }
+          });
+          console.log('✅ MediaPipe Hands created from global window object');
+        } else {
+          // Last resort - try to load from CDN
+          console.log('📦 Attempting to load MediaPipe from CDN...');
+          await this.loadMediaPipe();
+          
+          if (window.mediapipe && window.mediapipe.Hands) {
+            this.hands = new window.mediapipe.Hands({
+              locateFile: (file: string) => {
+                return `https://unpkg.com/@mediapipe/hands@0.4.1675469240/${file}`;
+              }
+            });
+            console.log('✅ MediaPipe Hands created after CDN loading');
+          } else {
+            throw new Error('MediaPipe Hands not available after loading attempts');
+          }
         }
-      });
+      }
 
-      // Set options with validation
+      // Set options with validation - use highest complexity for better accuracy
       this.hands.setOptions({
         maxNumHands: 1,
-        modelComplexity: 1,
-        minDetectionConfidence: 0.3,  // Even lower threshold
-        minTrackingConfidence: 0.2    // Even lower threshold
+        modelComplexity: 2, // Increase to maximum complexity (0, 1 or 2)
+        minDetectionConfidence: 0.1,  // Even lower threshold for initial detection
+        minTrackingConfidence: 0.05   // Very low threshold for continued tracking
       });
 
       // Test the hands instance
@@ -128,7 +146,8 @@ class MediaPipeService {
       const mediaError: MediaPipeError = {
         type: 'INITIALIZATION_FAILED',
         message: `MediaPipe initialization failed (attempt ${this.initializationAttempts}): ${errorMessage}`,
-        originalError: error
+        originalError: error,
+        timestamp: Date.now()
       };
       
       this.lastError = mediaError;
@@ -253,6 +272,9 @@ class MediaPipeService {
   }
 
   async detectHandLandmarks(imageElement: HTMLImageElement | HTMLVideoElement | HTMLCanvasElement): Promise<HandDetectionResult | null> {
+    // First check if we need to perform a health check on MediaPipe
+    await this.ensureMediaPipeHealth();
+    
     // If in fallback mode, try simple hand detection first
     if (this.fallbackMode) {
       console.debug("MediaPipe in fallback mode - trying simple hand detection");
@@ -300,8 +322,9 @@ class MediaPipeService {
               const handedness = results.multiHandedness?.[0]?.label || 'Unknown';
               const confidence = results.multiHandedness?.[0]?.score || 0;
 
-              // Much lower confidence threshold for better detection
-              if (confidence > 0.1) {
+              // Extremely low confidence threshold for dark environments
+              // Effectively accepting all detections and letting the model decide
+              if (confidence > 0.05) {
                 const normalizedLandmarks: HandLandmark[] = landmarks.map((landmark: any) => ({
                   x: landmark.x,
                   y: landmark.y,
@@ -312,7 +335,7 @@ class MediaPipeService {
                 resolve({
                   landmarks: normalizedLandmarks,
                   handedness,
-                  confidence
+                  confidence: Math.max(confidence, 0.1) // Boost very low confidence values
                 });
               } else {
                 console.log(`Hand detection confidence too low: ${confidence}`);
@@ -338,7 +361,8 @@ class MediaPipeService {
       const mediaError: MediaPipeError = {
         type: 'DETECTION_FAILED',
         message: `MediaPipe detection failed: ${error?.message || 'Unknown error'}`,
-        originalError: error
+        originalError: error,
+        timestamp: Date.now()
       };
       
       this.lastError = mediaError;
@@ -526,6 +550,40 @@ class MediaPipeService {
       return { success: true, message: 'MediaPipe is working correctly' };
     } catch (error: any) {
       return { success: false, message: `MediaPipe test failed: ${error?.message || 'Unknown error'}` };
+    }
+  }
+
+  // New method to check MediaPipe health and reset if needed
+  private async ensureMediaPipeHealth(): Promise<void> {
+    // Check if MediaPipe is initialized
+    if (!this.isInitialized || !this.hands) {
+      console.log("🩺 MediaPipe not initialized, attempting initialization...");
+      await this.initialize();
+      return;
+    }
+    
+    // Check if the MediaPipe instance seems broken
+    if (this.hands && (!this.hands.send || !this.hands.setOptions || !this.hands.onResults)) {
+      console.log("🩺 MediaPipe instance appears broken, attempting to reset...");
+      this.isInitialized = false;
+      this.hands = null;
+      await this.initialize();
+      return;
+    }
+    
+    // Check if we've had too many errors
+    if (this.lastError && Date.now() - (this.lastError.timestamp || 0) < 5000) {
+      this.errorCount = (this.errorCount || 0) + 1;
+      if (this.errorCount > 5) {
+        console.log("🩺 Too many MediaPipe errors, resetting...");
+        this.isInitialized = false;
+        this.hands = null;
+        this.errorCount = 0;
+        await this.initialize();
+        return;
+      }
+    } else {
+      this.errorCount = 0;
     }
   }
 }
