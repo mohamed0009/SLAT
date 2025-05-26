@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MessageCircle, Send } from "lucide-react";
 import chatbotService from '@/services/chatbot';
+import { ScrollableContainer } from '@/components/ui/scrollable-container';
 
 interface Message {
   text: string;
@@ -32,7 +33,7 @@ export const Conversation = forwardRef<ConversationHandle>((_, ref) => {
   }, []);
 
   useEffect(() => {
-    // Scroll to bottom whenever messages change
+    // Scroll to bottom when messages change
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
@@ -74,7 +75,12 @@ export const Conversation = forwardRef<ConversationHandle>((_, ref) => {
       </div>
 
       <div className="flex flex-col h-[400px]">
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <ScrollableContainer 
+          maxHeight="332px" 
+          padding="md" 
+          fadeEdges
+          className="flex-1 space-y-4"
+        >
           {messages.map((message, index) => (
             <div
               key={index}
@@ -83,10 +89,10 @@ export const Conversation = forwardRef<ConversationHandle>((_, ref) => {
               <div
                 className={`max-w-[80%] rounded-lg p-3 ${
                   message.type === 'user'
-                    ? 'bg-primary text-white'
+                    ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md'
                     : message.type === 'detection'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-gray-100'
+                    ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md'
+                    : 'glass shadow-sm dark:glass-dark'
                 }`}
               >
                 <p className="whitespace-pre-wrap">{message.text}</p>
@@ -107,9 +113,9 @@ export const Conversation = forwardRef<ConversationHandle>((_, ref) => {
             </div>
           ))}
           <div ref={messagesEndRef} />
-        </div>
+        </ScrollableContainer>
 
-        <div className="p-4 border-t">
+        <div className="p-4 border-t bg-gray-50 dark:bg-gray-800">
           <div className="flex gap-2">
             <Input
               value={inputText}
@@ -118,7 +124,10 @@ export const Conversation = forwardRef<ConversationHandle>((_, ref) => {
               placeholder="Ask me anything about SLAT..."
               className="flex-1"
             />
-            <Button onClick={handleSendMessage} className="rounded-full flex-shrink-0">
+            <Button 
+              onClick={handleSendMessage} 
+              className="rounded-full flex-shrink-0 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900"
+            >
               <Send className="h-4 w-4" />
             </Button>
           </div>

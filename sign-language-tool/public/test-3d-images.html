@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D ASL Images Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .image-test {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .image-card {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            background: #f9f9f9;
+        }
+        .image-card img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 5px;
+        }
+        .success {
+            border-color: #4CAF50;
+            background: #f0fff0;
+        }
+        .error {
+            border-color: #f44336;
+            background: #fff0f0;
+        }
+        .status {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .success .status {
+            color: #4CAF50;
+        }
+        .error .status {
+            color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤟 3D ASL Images Test</h1>
+        <p>Testing if the 3D ASL images are accessible and displaying correctly:</p>
+        
+        <div class="image-test">
+            <div class="image-card" id="card-a">
+                <h3>Letter A (3D)</h3>
+                <img id="img-a" src="/images/asl-signs/asl-a-3d.png" alt="ASL Letter A" 
+                     onload="markSuccess('a')" onerror="markError('a')">
+                <div class="status" id="status-a">Loading...</div>
+            </div>
+            
+            <div class="image-card" id="card-b">
+                <h3>Letter B (3D)</h3>
+                <img id="img-b" src="/images/asl-signs/asl-b-3d.png" alt="ASL Letter B" 
+                     onload="markSuccess('b')" onerror="markError('b')">
+                <div class="status" id="status-b">Loading...</div>
+            </div>
+        </div>
+        
+        <div class="image-test">
+            <div class="image-card" id="card-c">
+                <h3>Letter C (SVG)</h3>
+                <img id="img-c" src="/images/asl-signs/asl-c.svg" alt="ASL Letter C" 
+                     onload="markSuccess('c')" onerror="markError('c')">
+                <div class="status" id="status-c">Loading...</div>
+            </div>
+            
+            <div class="image-card" id="card-a-svg">
+                <h3>Letter A (SVG)</h3>
+                <img id="img-a-svg" src="/images/asl-signs/asl-a.svg" alt="ASL Letter A SVG" 
+                     onload="markSuccess('a-svg')" onerror="markError('a-svg')">
+                <div class="status" id="status-a-svg">Loading...</div>
+            </div>
+        </div>
+        
+        <div id="summary" style="margin-top: 30px; padding: 15px; border-radius: 5px;">
+            <h3>Test Summary</h3>
+            <p id="summary-text">Running tests...</p>
+        </div>
+    </div>
+
+    <script>
+        let results = {};
+        
+        function markSuccess(letter) {
+            results[letter] = true;
+            document.getElementById(`card-${letter}`).classList.add('success');
+            document.getElementById(`status-${letter}`).textContent = '✅ Loaded successfully';
+            updateSummary();
+        }
+        
+        function markError(letter) {
+            results[letter] = false;
+            document.getElementById(`card-${letter}`).classList.add('error');
+            document.getElementById(`status-${letter}`).textContent = '❌ Failed to load';
+            updateSummary();
+        }
+        
+        function updateSummary() {
+            const total = Object.keys(results).length;
+            const successful = Object.values(results).filter(r => r).length;
+            const failed = total - successful;
+            
+            const summaryDiv = document.getElementById('summary');
+            const summaryText = document.getElementById('summary-text');
+            
+            if (total >= 4) { // All tests completed
+                if (failed === 0) {
+                    summaryDiv.style.backgroundColor = '#f0fff0';
+                    summaryDiv.style.borderColor = '#4CAF50';
+                    summaryText.innerHTML = `🎉 All tests passed! (${successful}/${total})<br>3D ASL images are working correctly.`;
+                } else {
+                    summaryDiv.style.backgroundColor = '#fff0f0';
+                    summaryDiv.style.borderColor = '#f44336';
+                    summaryText.innerHTML = `⚠️ Some tests failed: ${successful} passed, ${failed} failed out of ${total} total.<br>Check the individual results above.`;
+                }
+            } else {
+                summaryText.textContent = `Running tests... (${total}/4 completed)`;
+            }
+        }
+        
+        // Timeout fallback
+        setTimeout(() => {
+            const images = ['a', 'b', 'c', 'a-svg'];
+            images.forEach(letter => {
+                if (!(letter in results)) {
+                    markError(letter);
+                }
+            });
+        }, 5000);
+    </script>
+</body>
+</html> 

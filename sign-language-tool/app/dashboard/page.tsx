@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import Cookies from 'js-cookie';
-import { BarChart2, Book, Calendar, Clock, GraduationCap, HandMetal, History, Star, Video, Zap } from "lucide-react";
+import { BarChart2, Book, Calendar, Clock, GraduationCap, HandMetal, History, Star, Video, Zap, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
 interface User {
@@ -102,6 +102,32 @@ export default function Dashboard() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-indigo-800 mb-2">Welcome, {user?.email}</h1>
         <p className="text-gray-600">Here's your sign language learning overview</p>
+      </div>
+
+      {/* Access URL */}
+      <div className="mb-8">
+        <Card className="bg-indigo-100 border-none shadow-sm">
+          <CardContent className="pt-6 pb-6">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-indigo-500 rounded-full">
+                <ExternalLink className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-indigo-800">Quick Access URL</h3>
+                <p className="text-indigo-600">
+                  <a 
+                    href="http://localhost:3000" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="underline hover:text-indigo-800"
+                  >
+                    http://localhost:3000
+                  </a>
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Stats Cards */}

@@ -9,6 +9,12 @@ const publicPaths = [
   "/register",
   "/api/auth/login",
   "/api/auth/register",
+  "/images",
+  "/icons",
+  "/models",
+  "/favicon.ico",
+  "/_next",
+  "/static",
 ];
 
 // Paths that require admin role
@@ -113,8 +119,12 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public folder
+     * - images (static images)
+     * - icons (static icons)
+     * - models (static models)
+     * - static (static assets)
+     * - *.html (HTML files)
      */
-    "/((?!_next/static|_next/image|favicon.ico|public/).*)",
+    "/((?!_next/static|_next/image|favicon.ico|images/|icons/|models/|static/|.*\\.html$).*)",
   ],
 };

@@ -190,13 +190,55 @@ const textToSignService = {
    * @returns URL of sign language image
    */
   getSignImage: async (word: string): Promise<string> => {
-    // Use data URLs instead of external URLs to avoid Next.js image domain issues
-    // These are simple SVG graphics with the word text
+    // First, check if we have an actual ASL hand sign for single letters or numbers
+    const character = word.toLowerCase().trim();
     
+    // Complete list of ASL alphabet letters
+    const completeASLAlphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+    
+    // Complete list of ASL numbers
+    const completeASLNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    
+    // Currently available custom SVG signs (letters only)
+    const availableCustomSigns = ['a', 'b', 'c', 'd', 'f', 'l', 'o', 'r', 'u', 'v', 'y'];
+    
+    // Check if it's a single character (letter or number)
+    const isLetter = character.length === 1 && completeASLAlphabet.includes(character);
+    const isNumber = character.length === 1 && completeASLNumbers.includes(character);
+    
+    // If it's a single letter or number, try different image sources in order of preference
+    if (isLetter || isNumber) {
+      try {
+        // Option 1: Try 3D ASL images (letters and numbers)
+        // These are stored in /images/asl-signs/ directory
+        const iconscout3DPath = `/images/asl-signs/asl-${character}-3d.png`;
+        
+        // Check if 3D image exists
+        const has3DImage = true; // Set to true when you have the 3D images
+        
+        if (has3DImage) {
+          return iconscout3DPath;
+        }
+        
+        // Option 2: Try our custom SVG signs (letters only, no numbers yet)
+        if (isLetter && availableCustomSigns.includes(character)) {
+          return `/images/asl-signs/asl-${character}.svg`;
+        }
+        
+        // Option 3: Generate enhanced text representation for characters not yet available
+        console.info(`ASL sign for ${isNumber ? 'number' : 'letter'} ${character.toUpperCase()} not yet available, using text representation`);
+        
+      } catch (error) {
+        console.warn(`Failed to load ASL sign for ${character}, falling back to text image`);
+      }
+    }
+    
+    // For words or characters we don't have ASL signs for, create a text-based image
     // Generate a color based on the word
     const colors = [
-      { bg: '#4f46e5', text: '#ffffff' }, // indigo
-      { bg: '#7c3aed', text: '#ffffff' }, // purple
+      { bg: '#1e40af', text: '#ffffff' }, // blue
+      { bg: '#1e3a8a', text: '#ffffff' }, // dark blue
+      { bg: '#1e40af', text: '#ffffff' }, // blue
       { bg: '#d946ef', text: '#ffffff' }, // fuchsia
       { bg: '#ec4899', text: '#ffffff' }, // pink
       { bg: '#f43f5e', text: '#ffffff' }  // rose
@@ -206,14 +248,47 @@ const textToSignService = {
     const index = Math.abs(word.charCodeAt(0) % colors.length);
     const color = colors[index];
     
-    // Create a simple SVG with the word
+    // Determine what type of character this is
+    const isLetterChar = character.length === 1 && completeASLAlphabet.includes(character);
+    const isNumberChar = character.length === 1 && completeASLNumbers.includes(character);
+    const characterType = isNumberChar ? 'Number' : isLetterChar ? 'Letter' : 'Word';
+    
+    // Enhanced text representation with better styling
     const svgImage = `
       <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
-        <rect width="400" height="400" fill="${color.bg}" />
-        <text x="200" y="200" font-family="Arial, sans-serif" font-size="48" 
+        <!-- Background with gradient -->
+        <defs>
+          <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:${color.bg};stop-opacity:1" />
+            <stop offset="100%" style="stop-color:${color.bg}dd;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <rect width="400" height="400" fill="url(#bgGradient)" />
+        
+        <!-- Main text -->
+        <text x="200" y="180" font-family="Arial, sans-serif" font-size="48" font-weight="bold"
               fill="${color.text}" text-anchor="middle" dominant-baseline="middle">
-          ${word}
+          ${word.toUpperCase()}
         </text>
+        
+        <!-- Type indicator -->
+        <text x="200" y="240" font-family="Arial, sans-serif" font-size="16" 
+              fill="${color.text}" text-anchor="middle" dominant-baseline="middle" opacity="0.8">
+          ${characterType}
+        </text>
+        
+        <!-- Status indicator -->
+        <text x="200" y="320" font-family="Arial, sans-serif" font-size="12" 
+              fill="${color.text}" text-anchor="middle" dominant-baseline="middle" opacity="0.6">
+          ${(isLetterChar || isNumberChar) ? 'ASL sign coming soon' : 'Text representation'}
+        </text>
+        
+        <!-- 3D signs attribution -->
+        ${(isLetterChar || isNumberChar) ? `
+        <text x="200" y="380" font-family="Arial, sans-serif" font-size="10" 
+              fill="${color.text}" text-anchor="middle" dominant-baseline="middle" opacity="0.4">
+          3D ASL signs available
+        </text>` : ''}
       </svg>
     `;
     

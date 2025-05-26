@@ -244,7 +244,7 @@ export const AudioToSign: React.FC = () => {
             w-20 h-20 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center
             ${isListening 
               ? "bg-red-500 hover:bg-red-600" 
-              : "bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"}
+              : "bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950"}
           `}
           disabled={isProcessing}
         >
@@ -270,7 +270,7 @@ export const AudioToSign: React.FC = () => {
             {waveform.map((height, index) => (
               <div 
                 key={index}
-                className="w-1 bg-gradient-to-t from-indigo-500 to-purple-500 rounded-full transition-all duration-100"
+                className="w-1 bg-gradient-to-t from-blue-800 to-blue-900 rounded-full transition-all duration-100"
                 style={{ height: `${height}px` }}
               />
             ))}
@@ -326,7 +326,7 @@ export const AudioToSign: React.FC = () => {
                 <span className="text-xs text-indigo-600 font-medium">{confidence}%</span>
                 <div className="w-16 h-2 bg-indigo-100 rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
+                    className="h-full bg-gradient-to-r from-blue-800 to-blue-900 rounded-full"
                     style={{ width: `${confidence}%` }}
                   />
                 </div>
@@ -335,7 +335,7 @@ export const AudioToSign: React.FC = () => {
             
             <div 
               key={currentSignIndex}
-              className="relative w-full h-60 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg overflow-hidden transition-opacity duration-300"
+              className="relative w-full h-60 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg overflow-hidden transition-opacity duration-300"
             >
               <Image
                 src={currentSignImage}

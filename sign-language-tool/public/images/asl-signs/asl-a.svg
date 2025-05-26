@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- Palm -->
+        <ellipse cx="100" cy="120" rx="35" ry="45" fill="#fdbcb4" stroke="#e09891" stroke-width="2"/>
+        
+        <!-- Thumb (visible on side) -->
+        <ellipse cx="65" cy="110" rx="12" ry="20" fill="#fdbcb4" stroke="#e09891" stroke-width="2"/>
+        
+        <!-- Closed fingers (fist) -->
+        <rect x="85" y="85" width="30" height="35" rx="15" fill="#fdbcb4" stroke="#e09891" stroke-width="2"/>
+        
+        <!-- Knuckles -->
+        <circle cx="90" cy="90" r="3" fill="#e09891"/>
+        <circle cx="100" cy="88" r="3" fill="#e09891"/>
+        <circle cx="110" cy="90" r="3" fill="#e09891"/>
+        
+        <!-- Label -->
+        <text x="100" y="180" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold" fill="#4f46e5">A</text>
+      </svg>

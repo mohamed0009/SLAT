@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- Palm -->
+        <ellipse cx="100" cy="130" rx="25" ry="35" fill="#fdbcb4" stroke="#e09891" stroke-width="2"/>
+        
+        <!-- Four fingers up -->
+        <rect x="85" y="60" width="8" height="40" rx="4" fill="#fdbcb4" stroke="#e09891" stroke-width="2"/>
+        <rect x="95" y="55" width="8" height="45" rx="4" fill="#fdbcb4" stroke="#e09891" stroke-width="2"/>
+        <rect x="105" y="55" width="8" height="45" rx="4" fill="#fdbcb4" stroke="#e09891" stroke-width="2"/>
+        <rect x="115" y="60" width="8" height="40" rx="4" fill="#fdbcb4" stroke="#e09891" stroke-width="2"/>
+        
+        <!-- Thumb across palm -->
+        <ellipse cx="85" cy="125" rx="8" ry="15" fill="#fdbcb4" stroke="#e09891" stroke-width="2"/>
+        
+        <!-- Label -->
+        <text x="100" y="180" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold" fill="#4f46e5">B</text>
+      </svg>

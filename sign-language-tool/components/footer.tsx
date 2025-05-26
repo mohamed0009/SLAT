@@ -5,7 +5,7 @@ import { Book, GraduationCap, HandMetal, Moon, PanelLeft } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white mt-12 relative overflow-hidden">
+    <footer className="bg-gradient-to-r from-blue-800 to-blue-900 text-white mt-12 relative overflow-hidden">
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1200 120%22 preserveAspectRatio=%22none%22%3E%3Cpath d=%22M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z%22 fill=%22%23ffffff%22%3E%3C/path%3E%3C/svg%3E')] h-full w-full bg-repeat-x bg-bottom animate-[wave_10s_linear_infinite]"></div>
       </div>

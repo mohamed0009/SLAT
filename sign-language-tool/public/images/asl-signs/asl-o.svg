@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- Circle formed by fingers -->
+        <circle cx="100" cy="100" r="35" fill="none" stroke="#fdbcb4" stroke-width="15"/>
+        
+        <!-- Fingertips -->
+        <circle cx="100" cy="65" r="4" fill="#e09891"/>
+        <circle cx="125" cy="80" r="4" fill="#e09891"/>
+        <circle cx="135" cy="100" r="4" fill="#e09891"/>
+        <circle cx="125" cy="120" r="4" fill="#e09891"/>
+        <circle cx="100" cy="135" r="4" fill="#e09891"/>
+        <circle cx="75" cy="120" r="4" fill="#e09891"/>
+        <circle cx="65" cy="100" r="4" fill="#e09891"/>
+        <circle cx="75" cy="80" r="4" fill="#e09891"/>
+        
+        <!-- Center circle to show the "O" -->
+        <circle cx="100" cy="100" r="20" fill="none" stroke="#4f46e5" stroke-width="2" stroke-dasharray="3,3"/>
+        
+        <!-- Label -->
+        <text x="100" y="180" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold" fill="#4f46e5">O</text>
+      </svg>

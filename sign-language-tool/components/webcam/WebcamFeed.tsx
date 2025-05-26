@@ -109,71 +109,111 @@ export const WebcamFeed = ({
   }, [isDetecting, onFrameCapture]);
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
-      <div className="relative aspect-video bg-zinc-800 rounded-lg overflow-hidden">
+    <div className="w-full max-w-4xl mx-auto">
+      <div className="relative aspect-video bg-zinc-900 rounded-lg overflow-hidden shadow-lg border border-zinc-700">
         <video
           ref={videoRef}
           autoPlay
           playsInline
           muted
           className="w-full h-full object-cover"
+          style={{ transform: 'scaleX(-1)' }} // Mirror the video for better user experience
         />
         <canvas ref={canvasRef} className="hidden" />
         
         {error ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-red-900/10 backdrop-blur-sm">
-            <div className="bg-red-50 p-4 rounded-lg shadow-lg max-w-md">
-              <div className="flex items-center gap-2 text-red-600 mb-2">
-                <AlertTriangle className="h-5 w-5" />
-                <span className="font-medium">Camera Error</span>
+          <div className="absolute inset-0 flex items-center justify-center bg-red-900/20 backdrop-blur-sm">
+            <div className="bg-red-50 p-6 rounded-lg shadow-lg max-w-md mx-4">
+              <div className="flex items-center gap-3 text-red-600 mb-3">
+                <AlertTriangle className="h-6 w-6" />
+                <span className="font-semibold">Camera Error</span>
               </div>
-              <p className="text-red-700">{error}</p>
+              <p className="text-red-700 mb-4">{error}</p>
+              <Button 
+                onClick={() => window.location.reload()} 
+                className="w-full bg-red-600 hover:bg-red-700 text-white"
+              >
+                Reload Page
+              </Button>
             </div>
           </div>
         ) : (
           <>
-            {/* Hand position guide */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              {!isDetecting && (
-                <>
-                  <div className="relative mb-2">
-                    <HandMetal className="h-16 w-16 text-white/70" />
-                    <div className="absolute inset-0 animate-ping opacity-40">
-                      <HandMetal className="h-16 w-16 text-white/50" />
-                    </div>
+            {/* Hand position guide - only show when not detecting */}
+            {!isDetecting && !isInitializing && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none bg-black/20">
+                <div className="relative mb-4">
+                  <HandMetal className="h-20 w-20 text-white/80" />
+                  <div className="absolute inset-0 animate-ping opacity-30">
+                    <HandMetal className="h-20 w-20 text-white/60" />
                   </div>
-                  <p className="text-white/90 text-lg font-medium mt-4 text-center px-4 drop-shadow-md">
-                    Position your hand in the frame
-                  </p>
-                </>
-              )}
-            </div>
+                </div>
+                <p className="text-white text-xl font-medium text-center px-6 drop-shadow-lg">
+                  Position your hand in the frame
+                </p>
+                <p className="text-white/80 text-sm text-center px-6 mt-2 drop-shadow-md">
+                  Make sure your hand is clearly visible and well-lit
+                </p>
+              </div>
+            )}
+
+            {/* Loading overlay */}
+            {isInitializing && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
+                <p className="text-white text-lg font-medium">Initializing Camera...</p>
+              </div>
+            )}
             
-            {/* Buttons overlay */}
-            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-3">
+            {/* Control buttons */}
+            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-4">
               <Button
                 onClick={onStartDetection}
                 disabled={isDetecting || isInitializing || !!error}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-md shadow-md disabled:opacity-60"
+                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
-                Start Detection
+                {isDetecting ? 'Detecting...' : 'Start Detection'}
               </Button>
               <Button
                 onClick={onStopDetection}
                 disabled={!isDetecting}
-                className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-md shadow-md disabled:opacity-60"
+                className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
                 Stop Detection
               </Button>
             </div>
             
             {/* Status indicator */}
-            <div className="absolute top-3 right-3 flex items-center gap-2 px-3 py-1.5 bg-black/70 backdrop-blur-sm text-white rounded-full shadow-md">
-              <div className={`h-2.5 w-2.5 rounded-full ${isDetecting ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`} />
-              <span className="text-sm font-medium">{isInitializing ? 'Initializing...' : isDetecting ? 'Detecting' : 'Ready'}</span>
+            <div className="absolute top-4 right-4 flex items-center gap-3 px-4 py-2 bg-black/70 backdrop-blur-sm text-white rounded-full shadow-lg">
+              <div className={`h-3 w-3 rounded-full ${
+                isInitializing ? 'bg-yellow-400 animate-pulse' :
+                isDetecting ? 'bg-green-400 animate-pulse' : 
+                'bg-gray-400'
+              }`} />
+              <span className="text-sm font-medium">
+                {isInitializing ? 'Initializing...' : 
+                 isDetecting ? 'Detecting' : 
+                 'Ready'}
+              </span>
             </div>
+
+            {/* Detection indicator */}
+            {isDetecting && (
+              <div className="absolute top-4 left-4 px-4 py-2 bg-green-600/90 backdrop-blur-sm text-white rounded-full shadow-lg">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 bg-white rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium">Live Detection</span>
+                </div>
+              </div>
+            )}
           </>
         )}
+      </div>
+      
+      {/* Camera info */}
+      <div className="mt-4 text-center text-sm text-gray-600">
+        <p>Camera feed is mirrored for better user experience</p>
+        <p className="mt-1">Ensure good lighting for optimal detection accuracy</p>
       </div>
     </div>
   );

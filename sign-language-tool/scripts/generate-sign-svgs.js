@@ -13,7 +13,7 @@ if (!fs.existsSync(outputDir)) {
 letters.forEach(letter => {
   const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
   <rect width="100" height="100" fill="#f3f4f6" />
-  <text x="50" y="50" font-family="Arial" font-size="40" text-anchor="middle" dominant-baseline="middle" fill="#4f46e5">${letter}</text>
+  <text x="50" y="50" font-family="Arial" font-size="40" text-anchor="middle" dominant-baseline="middle" fill="#1e40af">${letter}</text>
 </svg>`;
 
   fs.writeFileSync(path.join(outputDir, `${letter.toLowerCase()}.svg`), svgContent);

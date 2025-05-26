@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- Palm -->
+        <ellipse cx="100" cy="120" rx="25" ry="35" fill="#fdbcb4" stroke="#e09891" stroke-width="2"/>
+        
+        <!-- Index finger up -->
+        <rect x="96" y="50" width="8" height="50" rx="4" fill="#fdbcb4" stroke="#e09891" stroke-width="2"/>
+        
+        <!-- Thumb out to side -->
+        <rect x="65" y="116" width="25" height="8" rx="4" fill="#fdbcb4" stroke="#e09891" stroke-width="2"/>
+        
+        <!-- Folded fingers -->
+        <ellipse cx="110" cy="105" rx="6" ry="12" fill="#fdbcb4" stroke="#e09891" stroke-width="2"/>
+        <ellipse cx="118" cy="108" rx="6" ry="12" fill="#fdbcb4" stroke="#e09891" stroke-width="2"/>
+        <ellipse cx="125" cy="112" rx="5" ry="10" fill="#fdbcb4" stroke="#e09891" stroke-width="2"/>
+        
+        <!-- L-shape indicator -->
+        <path d="M 100 45 L 100 125 L 125 125" fill="none" stroke="#4f46e5" stroke-width="2" stroke-dasharray="5,5"/>
+        
+        <!-- Label -->
+        <text x="100" y="180" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold" fill="#4f46e5">L</text>
+      </svg>

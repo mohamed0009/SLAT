@@ -129,9 +129,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const signDescription = avatarElement.querySelector('.sign-description');
     
     // Default light mode colors
-    const lightColor = '#6366f1';
-    const darkColor = '#8b5cf6';
-    const accentColor = '#a78bfa';
+    const lightColor = '#1e40af';
+    const darkColor = '#1e3a8a';
+    const accentColor = '#3b82f6';
     
     head.style.background = `linear-gradient(135deg, ${lightColor}, ${darkColor})`;
     body.style.background = `linear-gradient(to bottom, ${lightColor}, ${darkColor})`;
@@ -870,7 +870,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .avatar-wrist {
           width: 30px;
           height: 10px;
-          background: linear-gradient(to bottom, #7c3aed, #8b5cf6);
+          background: linear-gradient(to bottom, #1e40af, #1e3a8a);
           border-radius: 5px;
           position: absolute;
           bottom: -5px;
@@ -1037,7 +1037,7 @@ function addKeyframeAnimations() {
     .avatar-head {
       width: 80px;
       height: 80px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      background: linear-gradient(135deg, #1e40af, #1e3a8a);
       border-radius: 50%;
       position: absolute;
       top: 0;
@@ -1048,7 +1048,7 @@ function addKeyframeAnimations() {
     .avatar-body {
       width: 100px;
       height: 150px;
-      background: linear-gradient(to bottom, #6366f1, #8b5cf6);
+      background: linear-gradient(to bottom, #1e40af, #1e3a8a);
       border-radius: 50px;
       position: absolute;
       top: 70px;
@@ -1068,7 +1068,7 @@ function addKeyframeAnimations() {
     .avatar-arm {
       width: 20px;
       height: 100px;
-      background: linear-gradient(to bottom, #6366f1, #8b5cf6);
+      background: linear-gradient(to bottom, #1e40af, #1e3a8a);
       border-radius: 10px;
       position: relative;
       transform-origin: top center;
@@ -1086,7 +1086,7 @@ function addKeyframeAnimations() {
     .avatar-hand {
       width: 40px;
       height: 50px;
-      background: linear-gradient(to bottom, #8b5cf6, #a78bfa);
+      background: linear-gradient(to bottom, #1e3a8a, #3b82f6);
       border-radius: 12px 12px 20px 20px;
       position: absolute;
       bottom: -40px;
@@ -1116,7 +1116,7 @@ function addKeyframeAnimations() {
     .avatar-palm {
       width: 38px;
       height: 35px;
-      background: linear-gradient(to bottom, #8b5cf6, #a78bfa);
+      background: linear-gradient(to bottom, #1e3a8a, #3b82f6);
       border-radius: 10px;
       position: absolute;
       top: 15px;
@@ -1127,7 +1127,7 @@ function addKeyframeAnimations() {
     .avatar-finger {
       width: 8px;
       height: 25px;
-      background: linear-gradient(to bottom, #8b5cf6, #a78bfa);
+      background: linear-gradient(to bottom, #1e3a8a, #3b82f6);
       border-radius: 4px;
       position: absolute;
       transform-origin: bottom center;
@@ -1213,8 +1213,8 @@ function addKeyframeAnimations() {
     }
     
     .avatar-status.processing {
-      background: rgba(79, 70, 229, 0.2);
-      color: #4f46e5;
+      background: rgba(30, 64, 175, 0.2);
+      color: #1e40af;
       animation: pulse 1s infinite;
     }
     

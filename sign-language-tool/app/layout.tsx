@@ -1,11 +1,22 @@
-import type React from "react"
+import React from "react"
 import { ThemeProvider } from "@/components/theme-provider"
 import "@/app/globals.css"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Inter, Poppins } from "next/font/google"
 import { LayoutWrapper } from "@/components/layout-wrapper"
+import ErrorBoundary from "@/components/ErrorBoundary"
+import SystemNotifications from "@/components/SystemNotifications"
+import GlobalErrorHandler from "@/components/GlobalErrorHandler"
+import { Toaster } from "@/components/ui/toaster"
+import { AnimatedBackground } from "@/components/animated-background"
+import Link from "next/link"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"], variable: '--font-inter' })
+const poppins = Poppins({ 
+  weight: ['400', '500', '600', '700'],
+  subsets: ["latin"],
+  variable: '--font-poppins',
+})
 
 export const metadata: Metadata = {
   title: "SLAT - Sign Language Analysis Tool",
@@ -20,9 +31,24 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-white dark:from-gray-900 dark:via-indigo-950/30 dark:to-gray-800 ${inter.className}`}>
+      <body className={`min-h-screen font-sans ${inter.variable} ${poppins.variable}`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-          <LayoutWrapper>{children}</LayoutWrapper>
+          <ErrorBoundary>
+            <AnimatedBackground />
+            <div className="relative z-10">
+              <GlobalErrorHandler />
+              <>
+                <div className="fixed top-2 right-2 z-50 bg-indigo-600 text-white text-xs px-2 py-1 rounded-md shadow-md">
+                  <Link href="http://localhost:3000" className="hover:text-indigo-200 transition-colors">
+                    localhost:3000
+                  </Link>
+                </div>
+                <LayoutWrapper>{children}</LayoutWrapper>
+                <SystemNotifications />
+                <Toaster />
+              </>
+            </div>
+          </ErrorBoundary>
         </ThemeProvider>
       </body>
     </html>

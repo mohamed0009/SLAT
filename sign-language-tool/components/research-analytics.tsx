@@ -159,7 +159,7 @@ export function ResearchAnalytics() {
     }, 1500)
   }
 
-  const COLORS = ["#6366f1", "#8b5cf6", "#d946ef", "#ec4899", "#f43f5e", "#f97316"]
+  const COLORS = ["#1e40af", "#1e3a8a", "#3b82f6", "#60a5fa", "#93c5fd", "#dbeafe"]
 
   const RADIAN = Math.PI / 180
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }: any) => {
@@ -291,11 +291,11 @@ export function ResearchAnalytics() {
                         <Line
                           type="monotone"
                           dataKey="accuracy"
-                          stroke="#6366f1"
+                          stroke="#1e40af"
                           strokeWidth={2}
                           activeDot={{ r: 8 }}
                         />
-                        <Line type="monotone" dataKey="confidence" stroke="#8b5cf6" strokeWidth={2} />
+                        <Line type="monotone" dataKey="confidence" stroke="#1e3a8a" strokeWidth={2} />
                       </RechartsLineChart>
                     </ResponsiveContainer>
                   </ChartContainer>
@@ -352,7 +352,7 @@ export function ResearchAnalytics() {
                         <XAxis dataKey="name" />
                         <YAxis />
                         <Tooltip content={<CustomTooltip />} />
-                        <Bar dataKey="value" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="value" fill="#1e40af" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </ChartContainer>
@@ -379,16 +379,16 @@ export function ResearchAnalytics() {
                           type="monotone"
                           dataKey="users"
                           stackId="1"
-                          stroke="#6366f1"
-                          fill="#6366f1"
+                          stroke="#1e40af"
+                          fill="#1e40af"
                           fillOpacity={0.6}
                         />
                         <Area
                           type="monotone"
                           dataKey="sessions"
                           stackId="1"
-                          stroke="#8b5cf6"
-                          fill="#8b5cf6"
+                          stroke="#1e3a8a"
+                          fill="#1e3a8a"
                           fillOpacity={0.6}
                         />
                       </AreaChart>

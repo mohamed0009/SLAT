@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MediaPipe Test</title>
+</head>
+<body>
+    <h1>MediaPipe Loading Test</h1>
+    <div id="status">Loading...</div>
+    
+    <script>
+        console.log('Starting MediaPipe test...');
+        
+        // Test different CDN sources
+        const cdnSources = [
+            'https://unpkg.com/@mediapipe/hands@0.4.1675469240/hands.js',
+            'https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js',
+            'https://cdn.skypack.dev/@mediapipe/hands'
+        ];
+        
+        let currentIndex = 0;
+        
+        function tryLoadMediaPipe() {
+            if (currentIndex >= cdnSources.length) {
+                document.getElementById('status').innerHTML = '❌ All CDN sources failed';
+                return;
+            }
+            
+            const script = document.createElement('script');
+            script.src = cdnSources[currentIndex];
+            
+            script.onload = function() {
+                console.log('✅ MediaPipe loaded from:', cdnSources[currentIndex]);
+                document.getElementById('status').innerHTML = `✅ MediaPipe loaded from: ${cdnSources[currentIndex]}`;
+                
+                // Test if MediaPipe is available
+                setTimeout(() => {
+                    if (window.mediapipe && window.mediapipe.Hands) {
+                        console.log('✅ MediaPipe Hands available');
+                        document.getElementById('status').innerHTML += '<br>✅ MediaPipe Hands available';
+                    } else {
+                        console.log('❌ MediaPipe Hands not available');
+                        document.getElementById('status').innerHTML += '<br>❌ MediaPipe Hands not available';
+                    }
+                }, 1000);
+            };
+            
+            script.onerror = function() {
+                console.log('❌ Failed to load from:', cdnSources[currentIndex]);
+                document.head.removeChild(script);
+                currentIndex++;
+                tryLoadMediaPipe();
+            };
+            
+            document.head.appendChild(script);
+        }
+        
+        tryLoadMediaPipe();
+    </script>
+</body>
+</html> 

@@ -19,10 +19,13 @@ import {
   Settings,
   ArrowLeft,
   ArrowRight,
-  CheckCircle
+  CheckCircle,
+  Eye,
+  ExternalLink
 } from 'lucide-react';
 import textToSignService from '@/services/textToSign';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface TextToSignProps {
   onTranslate?: (text: string) => void;
@@ -230,6 +233,44 @@ export const TextToSign = ({ onTranslate }: TextToSignProps) => {
     };
   }, [translatedText.length, currentIndex]);
 
+  // Check if current word has an actual ASL sign
+  const hasASLSign = (word: string): boolean => {
+    const character = word.toLowerCase().trim();
+    // Currently available custom SVG signs (letters only)
+    const availableCustomSigns = ['a', 'b', 'c', 'd', 'f', 'l', 'o', 'r', 'u', 'v', 'y'];
+    // 3D signs available for both letters and numbers
+    const has3DImages = true; // Set to true when IconScout images are available
+    
+    if (character.length === 1) {
+      // Check if we have 3D images for letters or numbers
+      if (has3DImages) {
+        return /^[a-z0-9]$/.test(character);
+      }
+      // Otherwise, check our custom signs (letters only)
+      return availableCustomSigns.includes(character);
+    }
+    return false;
+  };
+
+  // Get the type of ASL sign available
+  const getSignType = (word: string): 'custom' | '3d' | 'text' => {
+    const character = word.toLowerCase().trim();
+    const availableCustomSigns = ['a', 'b', 'c', 'd', 'f', 'l', 'o', 'r', 'u', 'v', 'y'];
+    const has3DImages = true; // Set to true when IconScout images are available
+    
+    if (character.length === 1) {
+      // Check for 3D images (letters and numbers)
+      if (has3DImages && /^[a-z0-9]$/.test(character)) {
+        return '3d';
+      }
+      // Check for custom SVG signs (letters only)
+      if (availableCustomSigns.includes(character)) {
+        return 'custom';
+      }
+    }
+    return 'text';
+  };
+
   // UI rendering based on component state
   const renderSignDisplay = () => {
     if (translatedText.length === 0) {
@@ -242,17 +283,43 @@ export const TextToSign = ({ onTranslate }: TextToSignProps) => {
           <p className="text-indigo-500 text-sm mt-1 max-w-xs">
             Enter text in the field below and click Translate to see it in sign language
           </p>
+          <div className="mt-4">
+            <Link href="/visual-guide">
+              <Button variant="outline" size="sm" className="text-xs border-indigo-200 text-indigo-600 hover:bg-indigo-50">
+                <Eye className="h-3 w-3 mr-1" />
+                Learn ASL Signs
+              </Button>
+            </Link>
+          </div>
         </div>
       );
     }
+
+    const currentWord = translatedText[currentIndex];
+    const isASLSign = hasASLSign(currentWord);
+    const signType = getSignType(currentWord);
 
     return (
       <div className="relative flex flex-col items-center justify-center w-full h-full">
         {/* Current word indicator */}
         <div className="absolute top-2 left-2 right-2 flex justify-between items-center">
-          <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-md">
-            {currentIndex + 1} of {translatedText.length}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-md">
+              {currentIndex + 1} of {translatedText.length}
+            </span>
+            {signType === '3d' && (
+              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-md flex items-center gap-1">
+                <HandMetal className="h-3 w-3" />
+                3D ASL
+              </span>
+            )}
+            {signType === 'custom' && (
+              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-md flex items-center gap-1">
+                <HandMetal className="h-3 w-3" />
+                ASL Sign
+              </span>
+            )}
+          </div>
           
           <Button 
             variant="ghost" 
@@ -268,13 +335,13 @@ export const TextToSign = ({ onTranslate }: TextToSignProps) => {
         {/* Current word */}
         <div className="mb-4 text-center">
           <div className="text-4xl font-bold text-indigo-800">
-            {translatedText[currentIndex]}
+            {currentWord.toUpperCase()}
           </div>
           <div className="text-xs text-indigo-500 mt-1">
             {currentIndex > 0 && (
               <span className="mr-2 opacity-50">{translatedText[currentIndex - 1]}</span>
             )}
-            <span className="font-bold underline">{translatedText[currentIndex]}</span>
+            <span className="font-bold underline">{currentWord}</span>
             {currentIndex < translatedText.length - 1 && (
               <span className="ml-2 opacity-50">{translatedText[currentIndex + 1]}</span>
             )}
@@ -286,11 +353,23 @@ export const TextToSign = ({ onTranslate }: TextToSignProps) => {
           {currentSignImage && (
             <Image
               src={currentSignImage}
-              alt={`Sign for ${translatedText[currentIndex]}`}
+              alt={`Sign for ${currentWord}`}
               fill
               className="object-contain p-1"
               priority
             />
+          )}
+          {signType === '3d' && (
+            <div className="absolute bottom-1 right-1 bg-blue-500 text-white text-xs px-2 py-1 rounded-md flex items-center gap-1">
+              <HandMetal className="h-3 w-3" />
+              3D ASL
+            </div>
+          )}
+          {signType === 'custom' && (
+            <div className="absolute bottom-1 right-1 bg-green-500 text-white text-xs px-2 py-1 rounded-md flex items-center gap-1">
+              <HandMetal className="h-3 w-3" />
+              Real ASL
+            </div>
           )}
         </div>
         
@@ -329,14 +408,38 @@ export const TextToSign = ({ onTranslate }: TextToSignProps) => {
         {/* Info panel */}
         {showInfo && (
           <div className="mt-4 p-3 bg-indigo-50 border border-indigo-100 rounded-lg text-sm w-full">
-            <p className="text-indigo-800 font-medium mb-1">About this sign</p>
-            <p className="text-indigo-600 text-xs mb-2">
-              The sign for "{translatedText[currentIndex]}" involves hand positioning and movement 
-              that represents the concept in American Sign Language (ASL).
+            <p className="text-indigo-800 font-medium mb-1">
+              {signType === '3d' ? `3D ASL Sign for "${currentWord.toUpperCase()}"` :
+               signType === 'custom' ? `ASL Sign for "${currentWord.toUpperCase()}"` :
+               `Text representation for "${currentWord}"`}
             </p>
-            <div className="flex items-center gap-2 text-xs text-indigo-700">
-              <CheckCircle className="h-3 w-3 text-green-500" />
-              <span>Use keyboard arrows to navigate between signs</span>
+            <p className="text-indigo-600 text-xs mb-2">
+              {signType === '3d' 
+                ? `This shows a professional 3D model of the American Sign Language hand position for "${currentWord.toUpperCase()}".`
+                : signType === 'custom'
+                ? `This shows the actual American Sign Language hand position for the letter "${currentWord.toUpperCase()}".`
+                : `This is a text representation. ${currentWord.length === 1 ? 'ASL hand sign not available for this letter.' : 'Word-level ASL signs are not yet supported.'}`
+              }
+            </p>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 text-xs text-indigo-700">
+                <CheckCircle className="h-3 w-3 text-green-500" />
+                <span>Use keyboard arrows to navigate between signs</span>
+              </div>
+              {(signType === '3d' || signType === 'custom') && (
+                <Link href="/visual-guide">
+                  <Button variant="outline" size="sm" className="text-xs border-indigo-200 text-indigo-600 hover:bg-indigo-50 w-full">
+                    <Eye className="h-3 w-3 mr-1" />
+                    Learn how to make this sign
+                    <ExternalLink className="h-3 w-3 ml-1" />
+                  </Button>
+                </Link>
+              )}
+              {signType === 'text' && currentWord.length === 1 && (
+                <div className="text-xs text-indigo-600 bg-indigo-100 p-2 rounded">
+                  💡 <strong>Coming Soon:</strong> Professional 3D ASL signs for all letters available with IconScout integration
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -345,15 +448,9 @@ export const TextToSign = ({ onTranslate }: TextToSignProps) => {
   };
 
   return (
-    <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow w-full max-w-3xl mx-auto">
-      <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 flex items-center gap-3 text-white">
-        <Languages className="h-5 w-5" />
-        <h2 className="text-lg font-medium">Text to Sign Language</h2>
-      </div>
-
-      <div className="p-4">
+    <>
         {/* Main display area */}
-        <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg p-4 sm:p-6 flex flex-col items-center justify-center h-[280px] sm:h-[320px] md:h-[350px] relative overflow-hidden shadow-sm border border-indigo-100">
+      <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 sm:p-6 flex flex-col items-center justify-center h-[280px] sm:h-[320px] md:h-[350px] relative overflow-hidden shadow-sm border border-blue-200">
           {renderSignDisplay()}
         </div>
 
@@ -375,7 +472,7 @@ export const TextToSign = ({ onTranslate }: TextToSignProps) => {
             />
             <button 
               type="button"
-              className="sm:w-auto w-full h-10 sm:h-12 px-3 sm:px-4 bg-purple-500 hover:bg-purple-600 text-white rounded-lg shadow-md flex items-center justify-center"
+            className="sm:w-auto w-full h-10 sm:h-12 px-3 sm:px-4 bg-blue-800 hover:bg-blue-900 text-white rounded-lg shadow-md flex items-center justify-center"
               onClick={handleTranslate}
               disabled={isLoading || !text.trim()}
               title="Translate"
@@ -454,9 +551,98 @@ export const TextToSign = ({ onTranslate }: TextToSignProps) => {
             <Info className="h-3 w-3" />
             <span>Tip: Use arrow keys ←→ to navigate and space to play/pause</span>
           </div>
+
+          {/* Available ASL Signs */}
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <HandMetal className="h-4 w-4 text-blue-600" />
+              <h3 className="text-sm font-medium text-blue-900">Available ASL Hand Signs</h3>
+            </div>
+            <p className="text-xs text-blue-700 mb-3">
+              Try these letters and numbers to see ASL hand signs (3D models and diagrams):
+            </p>
+            
+            {/* 3D Signs Section */}
+            <div className="mb-3">
+              <p className="text-xs font-medium text-blue-800 mb-2">🔵 3D Professional Models:</p>
+              <div className="flex flex-wrap gap-1 mb-2">
+                {/* 3D Letters */}
+                {['A', 'B', 'C', 'H', 'I', 'K', 'M', 'O', 'Z'].map((letter) => (
+                  <Button
+                    key={letter}
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 p-0 text-xs border-blue-200 text-blue-700 hover:bg-blue-100 font-bold"
+                    onClick={() => {
+                      setText(letter);
+                      setTimeout(() => handleTranslate(), 100);
+                    }}
+                    title="3D ASL Letter"
+                  >
+                    {letter}
+                  </Button>
+                ))}
+                {/* 3D Numbers */}
+                {['2', '8'].map((number) => (
+                  <Button
+                    key={number}
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 p-0 text-xs border-blue-200 text-blue-700 hover:bg-blue-100 font-bold bg-blue-50"
+                    onClick={() => {
+                      setText(number);
+                      setTimeout(() => handleTranslate(), 100);
+                    }}
+                    title="3D ASL Number"
+                  >
+                    {number}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Custom SVG Signs Section */}
+            <div className="mb-3">
+              <p className="text-xs font-medium text-green-800 mb-2">🟢 Custom Diagrams:</p>
+              <div className="flex flex-wrap gap-1">
+                {['D', 'F', 'L', 'R', 'U', 'V', 'Y'].map((letter) => (
+                  <Button
+                    key={letter}
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 p-0 text-xs border-green-200 text-green-700 hover:bg-green-100"
+                    onClick={() => {
+                      setText(letter);
+                      setTimeout(() => handleTranslate(), 100);
+                    }}
+                    title="Custom ASL Sign"
+                  >
+                    {letter}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-blue-600">
+                  11 3D signs + 7 custom signs = 18 total
+                </span>
+                <Link href="/visual-guide">
+                  <Button variant="outline" size="sm" className="text-xs border-blue-200 text-blue-600 hover:bg-blue-100">
+                    <Eye className="h-3 w-3 mr-1" />
+                    View All Signs
+                  </Button>
+                </Link>
+              </div>
+              <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
+                💎 <strong>3D Models:</strong> A, B, C, H, I, K, M, O, Z + Numbers 2, 8 | 
+                🎨 <strong>Custom Diagrams:</strong> D, F, L, R, U, V, Y
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </Card>
+    </>
   );
 };
 

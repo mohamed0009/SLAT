@@ -29,6 +29,7 @@ import {
   HelpCircle,
 } from "lucide-react"
 import { useTheme } from "next-themes"
+import { ScrollableContainer } from '@/components/ui/scrollable-container'
 
 export function Navigation() {
   const [sideMenuOpen, setSideMenuOpen] = useState(false)
@@ -166,7 +167,7 @@ export function Navigation() {
   return (
     <>
       {/* Top Navbar */}
-      <nav className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-indigo-500/90 to-purple-600/90 backdrop-blur-md shadow-lg dark:from-indigo-950 dark:to-purple-950 z-50 flex items-center px-6">
+      <nav className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-blue-800/90 to-blue-900/90 backdrop-blur-md shadow-lg dark:from-blue-950 dark:to-blue-950 z-50 flex items-center px-6">
         <div className="w-full flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
@@ -246,12 +247,12 @@ export function Navigation() {
 
               {notificationsOpen && (
                 <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-                  <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                  <div className="flex justify-between items-center p-3 border-b border-gray-200 dark:border-gray-700">
                     <h3 className="font-semibold text-gray-700 dark:text-gray-200">Notifications</h3>
                     <button className="text-xs text-primary hover:underline">Mark all as read</button>
                   </div>
                   
-                  <div className="max-h-80 overflow-y-auto">
+                  <ScrollableContainer maxHeight="320px" fadeEdges variant="thin">
                     {notifications.length === 0 ? (
                       <div className="p-4 text-center text-gray-500 dark:text-gray-400">
                         No notifications
@@ -262,7 +263,7 @@ export function Navigation() {
                           <div 
                             key={notification.id}
                             className={`p-3 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer flex items-start gap-3 ${
-                              notification.unread ? 'bg-indigo-50/50 dark:bg-indigo-900/20' : ''
+                              notification.unread ? 'bg-blue-50/50 dark:bg-blue-900/20' : ''
                             }`}
                           >
                             <div className={`mt-1 p-1.5 rounded-full ${notification.unread ? 'bg-primary text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>
@@ -275,8 +276,8 @@ export function Navigation() {
                                 </p>
                                 <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 whitespace-nowrap">
                                   {notification.time}
-              </span>
-            </div>
+                                </span>
+                              </div>
                               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">
                                 {notification.description}
                               </p>
@@ -288,7 +289,7 @@ export function Navigation() {
                         ))}
                       </div>
                     )}
-                  </div>
+                  </ScrollableContainer>
                   
                   <div className="p-2 border-t border-gray-200 dark:border-gray-700">
                     <Link 
@@ -391,7 +392,7 @@ export function Navigation() {
         }`}
       >
         {/* Header with matching gradient */}
-        <div className="bg-gradient-to-r from-indigo-500/90 to-purple-600/90 flex items-center justify-between p-4 h-16 border-b border-white/20">
+        <div className="bg-gradient-to-r from-blue-800/90 to-blue-900/90 flex items-center justify-between p-4 h-16 border-b border-white/20">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 bg-white rounded-full flex items-center justify-center shadow-md">
               <HandMetal className="h-5 w-5 text-indigo-600" />
@@ -417,7 +418,7 @@ export function Navigation() {
           </div>
         </div>
 
-        <div className="mt-2 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 180px)' }}>
+        <ScrollableContainer maxHeight="calc(100vh - 180px)" fadeEdges padding="none" className="mt-2">
           <div className="px-4 py-4">
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">
               MAIN MENU
@@ -431,7 +432,7 @@ export function Navigation() {
                       href={item.href}
                       className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all ${
                         isActive
-                          ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                          ? "bg-gradient-to-r from-blue-800 to-blue-900 text-white"
                           : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                       }`}
                     >
@@ -461,7 +462,7 @@ export function Navigation() {
                       href={item.href}
                       className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all ${
                         isActive
-                          ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                          ? "bg-gradient-to-r from-blue-800 to-blue-900 text-white"
                           : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                       }`}
                     >
@@ -477,7 +478,7 @@ export function Navigation() {
               })}
             </ul>
           </div>
-        </div>
+        </ScrollableContainer>
 
         <div className="absolute bottom-0 left-0 right-0 border-t border-gray-200 dark:border-gray-800 p-4 bg-white dark:bg-gray-900">
           <div className="flex items-center justify-between mb-4">

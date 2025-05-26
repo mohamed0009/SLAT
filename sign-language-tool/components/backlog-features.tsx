@@ -114,31 +114,39 @@ export function BacklogFeatures() {
       )}
 
       <Tabs defaultValue="translation" onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-4 w-full bg-gradient-to-r from-indigo-100 to-purple-100">
+        <TabsList className="grid grid-cols-4 w-full bg-gradient-to-r from-blue-100 to-blue-200">
           <TabsTrigger 
             value="translation"
-            className="data-[state=active]:bg-white data-[state=active]:text-indigo-700"
+            className={`${activeTab === 'translation' 
+            ? "bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950"
+            : ""}`}
           >
             <Languages className="h-4 w-4 mr-2" />
             Translation
           </TabsTrigger>
           <TabsTrigger 
             value="recognition"
-            className="data-[state=active]:bg-white data-[state=active]:text-indigo-700"
+            className={`${activeTab === 'recognition' 
+            ? "bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950"
+            : ""}`}
           >
             <HandMetal className="h-4 w-4 mr-2" />
             Recognition
           </TabsTrigger>
           <TabsTrigger 
             value="export"
-            className="data-[state=active]:bg-white data-[state=active]:text-indigo-700"
+            className={`${activeTab === 'export' 
+            ? "bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950"
+            : ""}`}
           >
             <Download className="h-4 w-4 mr-2" />
             Export
           </TabsTrigger>
           <TabsTrigger 
             value="feedback"
-            className="data-[state=active]:bg-white data-[state=active]:text-indigo-700"
+            className={`${activeTab === 'feedback' 
+            ? "bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950"
+            : ""}`}
           >
             <FileText className="h-4 w-4 mr-2" />
             Feedback
@@ -159,7 +167,7 @@ export function BacklogFeatures() {
                   variant={translationMode === "text-to-sign" ? "default" : "outline"}
                   className={`flex-1 ${
                     translationMode === "text-to-sign" 
-                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700" 
+                      ? "bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950" 
                       : "border-indigo-200 text-indigo-700 hover:bg-indigo-50"
                   }`}
                   onClick={() => setTranslationMode("text-to-sign")}
@@ -171,7 +179,7 @@ export function BacklogFeatures() {
                   variant={translationMode === "sign-to-text" ? "default" : "outline"}
                   className={`flex-1 ${
                     translationMode === "sign-to-text" 
-                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700" 
+                      ? "bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950" 
                       : "border-indigo-200 text-indigo-700 hover:bg-indigo-50"
                   }`}
                   onClick={() => setTranslationMode("sign-to-text")}
@@ -183,7 +191,7 @@ export function BacklogFeatures() {
                   variant={translationMode === "voice-to-sign" ? "default" : "outline"}
                   className={`flex-1 ${
                     translationMode === "voice-to-sign" 
-                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700" 
+                      ? "bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950" 
                       : "border-indigo-200 text-indigo-700 hover:bg-indigo-50"
                   }`}
                   onClick={() => setTranslationMode("voice-to-sign")}
@@ -229,7 +237,7 @@ export function BacklogFeatures() {
                     </Select>
                   </div>
                   <Button 
-                    className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md transition-all duration-200" 
+                    className="w-full bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950 shadow-md transition-all duration-200" 
                     onClick={handleAction} 
                     disabled={isLoading}
                   >
@@ -250,12 +258,12 @@ export function BacklogFeatures() {
 
               {translationMode === "sign-to-text" && (
                 <div className="space-y-4">
-                  <div className="aspect-video bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg flex items-center justify-center relative shadow-inner">
+                  <div className="aspect-video bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg flex items-center justify-center relative shadow-inner">
                     <Camera className="h-12 w-12 text-indigo-300" />
                     <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4">
                       <Button 
                         onClick={toggleRecording} 
-                        className={isRecording ? "bg-red-500 hover:bg-red-600" : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md transition-all duration-200"}
+                        className={isRecording ? "bg-red-500 hover:bg-red-600" : "bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950 shadow-md transition-all duration-200"}
                       >
                         {isRecording ? "Stop Recording" : "Start Recording"}
                       </Button>
@@ -278,11 +286,11 @@ export function BacklogFeatures() {
 
               {translationMode === "voice-to-sign" && (
                 <div className="space-y-4">
-                  <div className="p-6 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg flex flex-col items-center justify-center shadow-inner">
+                  <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg flex flex-col items-center justify-center shadow-inner">
                     <Button
                       size="lg"
                       className={`rounded-full h-16 w-16 shadow-md transition-all duration-200 ${
-                        isRecording ? "bg-red-500 hover:bg-red-600" : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                        isRecording ? "bg-red-500 hover:bg-red-600" : "bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950"
                       }`}
                       onClick={toggleRecording}
                     >
@@ -298,7 +306,7 @@ export function BacklogFeatures() {
                     <Button 
                       disabled={!isLoading && !showSuccess} 
                       onClick={handleAction}
-                      className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md transition-all duration-200 disabled:opacity-50"
+                      className="bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950 shadow-md transition-all duration-200 disabled:opacity-50"
                     >
                       <HandMetal className="h-4 w-4 mr-2" />
                       Translate to Sign Language
@@ -373,12 +381,12 @@ export function BacklogFeatures() {
 
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="aspect-video bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg flex items-center justify-center relative shadow-inner">
+                <div className="aspect-video bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg flex items-center justify-center relative shadow-inner">
                   <Camera className="h-12 w-12 text-indigo-300" />
                   <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4">
                     <Button 
                       onClick={toggleRecording}
-                      className={isRecording ? "bg-red-500 hover:bg-red-600" : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md transition-all duration-200"}
+                      className={isRecording ? "bg-red-500 hover:bg-red-600" : "bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950 shadow-md transition-all duration-200"}
                     >
                       {isRecording ? "Stop Recognition" : "Start Recognition"}
                     </Button>
@@ -393,7 +401,7 @@ export function BacklogFeatures() {
                         <span className="text-indigo-700">Accuracy:</span>
                         <Badge 
                           variant={recognitionAccuracy > 80 ? "default" : "outline"}
-                          className={recognitionAccuracy > 80 ? "bg-gradient-to-r from-indigo-600 to-purple-600" : "text-indigo-700 border-indigo-200"}
+                          className={recognitionAccuracy > 80 ? "bg-gradient-to-r from-blue-800 to-blue-900" : "text-indigo-700 border-indigo-200"}
                         >
                           {recognitionAccuracy}%
                         </Badge>
@@ -498,7 +506,7 @@ export function BacklogFeatures() {
                   Save Results
                 </Button>
                 <Button
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md transition-all duration-200"
+                  className="bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950 shadow-md transition-all duration-200"
                 >
                   <Share2 className="h-4 w-4 mr-2" />
                   Share Analysis
@@ -543,7 +551,7 @@ export function BacklogFeatures() {
                 <Button 
                   disabled={!isLoading && uploadProgress < 100} 
                   onClick={handleAction}
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md transition-all duration-200 disabled:opacity-50"
+                  className="bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950 shadow-md transition-all duration-200 disabled:opacity-50"
                 >
                   <HandMetal className="h-4 w-4 mr-2" />
                   Analyze Video
@@ -614,7 +622,7 @@ export function BacklogFeatures() {
                 </div>
 
                 <div className="space-y-4">
-                  <div className="aspect-video bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg flex items-center justify-center relative shadow-inner">
+                  <div className="aspect-video bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg flex items-center justify-center relative shadow-inner">
                     {exportFormat === "mp4" && <Video className="h-12 w-12 text-indigo-300" />}
                     {exportFormat === "gif" && <Play className="h-12 w-12 text-indigo-300" />}
                     {exportFormat === "pdf" && <FileText className="h-12 w-12 text-indigo-300" />}
@@ -661,7 +669,7 @@ export function BacklogFeatures() {
                 <Button 
                   onClick={handleAction} 
                   disabled={isLoading}
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md transition-all duration-200"
+                  className="bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950 shadow-md transition-all duration-200"
                 >
                   {isLoading ? (
                     <>
@@ -720,7 +728,7 @@ export function BacklogFeatures() {
                 <Button 
                   onClick={handleAction} 
                   disabled={isLoading}
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md transition-all duration-200"
+                  className="bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950 shadow-md transition-all duration-200"
                 >
                   {isLoading ? (
                     <>
@@ -754,7 +762,7 @@ export function BacklogFeatures() {
                 <p className="text-indigo-600 mb-6">Your feedback helps us improve the Sign Language Analysis Tool.</p>
                 <Button 
                   onClick={() => setFeedbackSubmitted(false)}
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md transition-all duration-200"
+                  className="bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950 shadow-md transition-all duration-200"
                 >
                   Submit Another Feedback
                 </Button>
@@ -816,7 +824,7 @@ export function BacklogFeatures() {
                   <Button 
                     type="submit" 
                     disabled={isLoading}
-                    className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md transition-all duration-200"
+                    className="bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950 shadow-md transition-all duration-200"
                   >
                     {isLoading ? (
                       <>
@@ -873,7 +881,7 @@ export function BacklogFeatures() {
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="border border-indigo-100 shadow-lg">
-                  <DialogHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 -m-6 mb-6 rounded-t-lg">
+                  <DialogHeader className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 -m-6 mb-6 rounded-t-lg">
                     <DialogTitle className="text-indigo-900">Report Technical Issue</DialogTitle>
                     <DialogDescription className="text-indigo-600">
                       Please provide details about the technical issue you're experiencing.
@@ -922,7 +930,7 @@ export function BacklogFeatures() {
                       </Button>
                       <Button 
                         onClick={handleAction}
-                        className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md transition-all duration-200"
+                        className="bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950 shadow-md transition-all duration-200"
                       >
                         Submit Report
                       </Button>

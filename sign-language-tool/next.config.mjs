@@ -21,7 +21,12 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
-    domains: ['placehold.co'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'placehold.co',
+      },
+    ],
   },
   experimental: {
     webpackBuildWorker: true,

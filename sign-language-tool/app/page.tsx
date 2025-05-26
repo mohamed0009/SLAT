@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from "next/link"
-import { Activity, BarChart2, Bell, Book, HandMetal, Languages, Layers, Mic, Send, Settings, User, Video } from "lucide-react"
+import { Activity, BarChart2, Bell, Book, HandMetal, Languages, Layers, Mic, Send, Settings, User, Video, AlertCircle, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { PageHeader } from "@/components/page-header"
@@ -39,6 +39,8 @@ export default function HomePage() {
   // Use refs to track state and component references
   const isProcessingRef = useRef(false);
   const conversationRef = useRef<ConversationHandle>(null);
+  const [handDetected, setHandDetected] = useState(false);
+  const [landmarks, setLandmarks] = useState(0);
 
   useEffect(() => {
     const initializeModel = async () => {
@@ -63,6 +65,11 @@ export default function HomePage() {
       const startTime = performance.now();
 
       const result = await signLanguageModel.detectSign(imageData);
+      
+      // Update hand detection state
+      setHandDetected(result.confidence > 0.5);
+      // Ensure landmarks is a number - if it's an array, use its length instead
+      setLandmarks(Array.isArray(result.landmarks) ? result.landmarks.length : (result.landmarks || 0));
       
       const endTime = performance.now();
       const detectionTime = endTime - startTime;
@@ -204,6 +211,51 @@ export default function HomePage() {
                       <Badge variant={systemStatus.processing === 'active' ? 'default' : 'outline'} className={systemStatus.processing === 'active' ? 'bg-indigo-500 hover:bg-indigo-600' : ''}>
                         {systemStatus.processing}
                       </Badge>
+                    </div>
+                  </div>
+                </Card>
+                
+                {/* Debug Info Card */}
+                <Card className="shadow-md border border-indigo-100">
+                  <div className="bg-gradient-to-r from-orange-500 to-red-500 p-3 border-b flex items-center gap-2 text-white">
+                    <Activity className="h-4 w-4" />
+                    <h4 className="font-medium">Debug Info</h4>
+                  </div>
+                  <div className="p-4 space-y-2">
+                    <div className="flex justify-between py-1 border-b border-indigo-100">
+                      <span className="text-indigo-700">Hand Detected</span>
+                      <Badge 
+                        variant={handDetected ? 'default' : 'destructive'}
+                        className={handDetected ? 'bg-green-500 text-white' : ''}
+                      >
+                        {handDetected ? 'Yes' : 'No'}
+                      </Badge>
+                    </div>
+                    
+                    <div className="flex justify-between py-1 border-b border-indigo-100">
+                      <span className="text-indigo-700">Hand Confidence</span>
+                      <span className="font-medium text-indigo-900">{(detectionResult.confidence * 100).toFixed(1)}%</span>
+                    </div>
+                    
+                    <div className="flex justify-between py-1 border-b border-indigo-100">
+                      <span className="text-indigo-700">Landmarks</span>
+                      <span className="font-medium text-indigo-900">{landmarks}</span>
+                    </div>
+                    
+                    <div className="mt-2">
+                      <h3 className="text-sm font-medium mb-2 text-indigo-700">Log Events</h3>
+                      <div className="bg-indigo-50 p-2 rounded-md font-mono text-xs h-24 overflow-y-auto">
+                        <div className="text-green-600">[INFO] Model loaded successfully</div>
+                        <div className="text-indigo-600">[DEBUG] Camera {systemStatus.camera}</div>
+                        <div className="text-indigo-600">[DEBUG] MediaPipe Hands model initialized</div>
+                        {detectionResult.confidence < 0.5 && (
+                          <div className="text-orange-500">[WARN] Low detection confidence: {(detectionResult.confidence * 100).toFixed(1)}%</div>
+                        )}
+                        <div className="text-indigo-600">[DEBUG] Processing at {detectionResult.fps.toFixed(1)}fps</div>
+                        {landmarks > 0 && (
+                          <div className="text-indigo-600">[DEBUG] {landmarks} landmarks detected</div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </Card>

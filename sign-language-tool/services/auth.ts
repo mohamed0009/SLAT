@@ -4,6 +4,7 @@ export interface TokenPayload {
   userId: string;
   email: string;
   role: string;
+  [key: string]: string | number | boolean | null; // Add index signature for JWTPayload compatibility
 }
 
 export class AuthService {
@@ -35,7 +36,17 @@ export class AuthService {
   async verifyToken(token: string): Promise<TokenPayload> {
     try {
       const { payload } = await jwtVerify(token, this.secret);
-      return payload as TokenPayload;
+      
+      // Validate the payload has the required properties before casting
+      if (!payload.userId || !payload.email || !payload.role) {
+        throw new Error("Invalid token payload structure");
+      }
+      
+      return {
+        userId: String(payload.userId),
+        email: String(payload.email),
+        role: String(payload.role)
+      };
     } catch (error) {
       console.error("Token verification error:", error);
       throw new Error("Invalid or expired token");
@@ -44,7 +55,7 @@ export class AuthService {
 
   async createToken(payload: TokenPayload): Promise<string> {
     try {
-      return await new SignJWT(payload)
+      return await new SignJWT(payload as any)
         .setProtectedHeader({ alg: "HS256" })
         .setIssuedAt()
         .setExpirationTime("24h")
