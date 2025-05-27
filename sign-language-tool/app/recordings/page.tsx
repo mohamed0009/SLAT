@@ -1057,9 +1057,6 @@ export default function RecordingsPage() {
 
   return (
     <div className="container py-6">
-      {/* Add the custom styles */}
-      <style jsx global>{customStyles}</style>
-      
       {/* Video Player Modal */}
       {showVideoPlayer && currentlyPlaying && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
