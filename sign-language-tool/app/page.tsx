@@ -54,6 +54,9 @@ export default function HomePage() {
   const [recordedSigns, setRecordedSigns] = useState<string[]>([]);
   const [recordingStartTime, setRecordingStartTime] = useState<number | null>(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
+  const [recordingName, setRecordingName] = useState('');
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [recordingToSave, setRecordingToSave] = useState<any>(null);
   
   // Timer for recording duration
   useEffect(() => {
@@ -169,6 +172,7 @@ export default function HomePage() {
     setRecordedSigns([]);
     setRecordingStartTime(Date.now());
     setRecordingDuration(0);
+    setShowSaveDialog(false);
   };
 
   // Format time for recording display
@@ -181,7 +185,7 @@ export default function HomePage() {
   const handleStopRecording = async () => {
     setIsRecording(false);
     
-    // Save recording data
+    // Create recording data
     if (recordedSigns.length > 0) {
       try {
         // Create a recording object that matches the format used in the recordings page
@@ -208,13 +212,29 @@ export default function HomePage() {
           timestamp: today.toISOString()
         };
         
-        console.log('Recording saved:', recordingData);
+        // Set the recording to save and show dialog
+        setRecordingToSave(recordingData);
+        setShowSaveDialog(true);
+        
+      } catch (error) {
+        console.error('Failed to prepare recording:', error);
+      }
+    }
+  };
+  
+  const handleSaveRecording = () => {
+    if (recordingToSave) {
+      try {
+        // Update title if custom name provided
+        if (recordingName.trim()) {
+          recordingToSave.title = recordingName.trim();
+        }
         
         // Load existing recordings
         const existingRecordings = JSON.parse(localStorage.getItem('userRecordings') || '[]');
         
         // Add new recording to the list
-        existingRecordings.push(recordingData);
+        existingRecordings.push(recordingToSave);
         
         // Save back to localStorage
         localStorage.setItem('userRecordings', JSON.stringify(existingRecordings));
@@ -222,12 +242,22 @@ export default function HomePage() {
         // Confirm the save with a console message
         console.log(`Saved ${recordedSigns.length} signs to userRecordings storage`);
         
+        // Reset state
+        setShowSaveDialog(false);
+        setRecordingName('');
+        
         // Navigate to the recordings page
         router.push('/recordings');
       } catch (error) {
         console.error('Failed to save recording:', error);
       }
     }
+  };
+  
+  const handleDiscardRecording = () => {
+    setRecordedSigns([]);
+    setShowSaveDialog(false);
+    setRecordingName('');
   };
 
   return (
@@ -238,7 +268,7 @@ export default function HomePage() {
         {/* Video Container */}
         <div className="lg:col-span-2 space-y-8">
           <Card className="shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
-            <div className="bg-gradient-to-r from-violet-600 to-indigo-700 p-4 flex items-center justify-between text-white">
+            <div className="bg-gradient-to-r from-blue-800 to-blue-900 p-4 flex items-center justify-between text-white">
               <div className="flex items-center gap-3">
                 <Video className="h-5 w-5" />
                 <h3 className="text-lg font-medium">Live Camera Feed</h3>
@@ -254,28 +284,28 @@ export default function HomePage() {
                     </div>
                     <Button 
                       size="sm" 
-                      variant="destructive" 
-                      className="flex items-center gap-1 bg-red-500 hover:bg-red-600"
+                      variant="default" 
+                      className="flex items-center gap-1 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white font-bold shadow-md px-4 py-2"
                       onClick={handleStopRecording}
                     >
                       <StopCircle className="h-4 w-4" />
-                      Stop Recording
+                      STOP RECORDING
                     </Button>
                   </div>
                 ) : (
                   <Button 
                     size="sm" 
-                    variant="outline" 
-                    className="border-white/30 text-white hover:bg-white/10 flex items-center gap-1"
+                    variant="default" 
+                    className="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white font-bold shadow-md flex items-center gap-1 px-4 py-2"
                     onClick={handleStartRecording}
                   >
-                    <Circle className="h-4 w-4" />
-                    Start Recording
+                    <Circle className="h-4 w-4 text-white animate-pulse" />
+                    START RECORDING
                   </Button>
                 )}
               </div>
             </div>
-            <div className="p-4 sm:p-6 bg-gradient-to-b from-indigo-50/50 to-white">
+            <div className="p-4 sm:p-6 bg-gradient-to-b from-blue-50/50 to-white">
               <WebcamFeed
                 onFrameCapture={handleFrameCapture}
                 isDetecting={isDetecting}
@@ -286,14 +316,14 @@ export default function HomePage() {
           </Card>
 
           <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-            <div className="bg-gradient-to-r from-violet-600 to-indigo-700 p-4 border-b flex items-center gap-3 text-white">
+            <div className="bg-gradient-to-r from-blue-800 to-blue-900 p-4 border-b flex items-center gap-3 text-white">
               <HandMetal className="h-5 w-5" />
               <h3 className="text-lg font-medium">Real-Time Detection Dashboard</h3>
             </div>
 
             <div className="p-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card className="bg-gradient-to-r from-violet-700 to-indigo-800 text-white shadow-md">
+                <Card className="bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md">
                   <div className="p-3 border-b border-white/20 flex items-center gap-2">
                     <HandMetal className="h-4 w-4" />
                     <h4 className="font-medium">Current Sign</h4>
@@ -316,65 +346,65 @@ export default function HomePage() {
                   </div>
                 </Card>
 
-                <Card className="shadow-md border border-indigo-100">
-                  <div className="bg-gradient-to-r from-violet-600 to-indigo-700 p-3 border-b flex items-center gap-2 text-white">
+                <Card className="shadow-md border border-blue-100">
+                  <div className="bg-gradient-to-r from-blue-800 to-blue-900 p-3 border-b flex items-center gap-2 text-white">
                     <Activity className="h-4 w-4" />
                     <h4 className="font-medium">Performance Metrics</h4>
                   </div>
                   <div className="p-4 space-y-2">
-                    <div className="flex justify-between py-1 border-b border-indigo-100">
-                      <span className="text-indigo-700">Detection Time</span>
-                      <span className="font-medium text-indigo-900">{detectionResult.detectionTime.toFixed(1)}ms</span>
+                    <div className="flex justify-between py-1 border-b border-blue-100">
+                      <span className="text-blue-700">Detection Time</span>
+                      <span className="font-medium text-blue-900">{detectionResult.detectionTime.toFixed(1)}ms</span>
                     </div>
-                    <div className="flex justify-between py-1 border-b border-indigo-100">
-                      <span className="text-indigo-700">Accuracy</span>
-                      <span className="font-medium text-indigo-900">{(detectionResult.confidence * 100).toFixed(1)}%</span>
+                    <div className="flex justify-between py-1 border-b border-blue-100">
+                      <span className="text-blue-700">Accuracy</span>
+                      <span className="font-medium text-blue-900">{(detectionResult.confidence * 100).toFixed(1)}%</span>
                     </div>
                     <div className="flex justify-between py-1">
-                      <span className="text-indigo-700">FPS</span>
-                      <span className="font-medium text-indigo-900">{detectionResult.fps.toFixed(1)}</span>
+                      <span className="text-blue-700">FPS</span>
+                      <span className="font-medium text-blue-900">{detectionResult.fps.toFixed(1)}</span>
                     </div>
-                    <div className="flex justify-between py-1 border-t border-indigo-100 mt-1">
-                      <span className="text-indigo-700">Method</span>
-                      <Badge className="bg-green-500 hover:bg-green-600">MediaPipe</Badge>
+                    <div className="flex justify-between py-1 border-t border-blue-100 mt-1">
+                      <span className="text-blue-700">Method</span>
+                      <Badge className="bg-blue-500 hover:bg-blue-600">MediaPipe</Badge>
                     </div>
                   </div>
                 </Card>
 
-                <Card className="shadow-md border border-indigo-100">
-                  <div className="bg-gradient-to-r from-violet-600 to-indigo-700 p-3 border-b flex items-center gap-2 text-white">
+                <Card className="shadow-md border border-blue-100">
+                  <div className="bg-gradient-to-r from-blue-800 to-blue-900 p-3 border-b flex items-center gap-2 text-white">
                     <Settings className="h-4 w-4" />
                     <h4 className="font-medium">System Status</h4>
                   </div>
                   <div className="p-4 space-y-2">
-                    <div className="flex justify-between py-1 border-b border-indigo-100">
-                      <span className="text-indigo-700">Camera</span>
+                    <div className="flex justify-between py-1 border-b border-blue-100">
+                      <span className="text-blue-700">Camera</span>
                       <Badge variant={systemStatus.camera === 'ready' ? 'default' : systemStatus.camera === 'error' ? 'destructive' : 'outline'} 
-                         className={systemStatus.camera === 'ready' ? 'bg-green-500 text-white' : ''}>
+                         className={systemStatus.camera === 'ready' ? 'bg-blue-500 text-white' : ''}>
                         {systemStatus.camera}
                       </Badge>
                     </div>
-                    <div className="flex justify-between py-1 border-b border-indigo-100">
-                      <span className="text-indigo-700">Model</span>
+                    <div className="flex justify-between py-1 border-b border-blue-100">
+                      <span className="text-blue-700">Model</span>
                       <Badge variant={systemStatus.model === 'ready' ? 'default' : systemStatus.model === 'error' ? 'destructive' : 'outline'}
-                         className={systemStatus.model === 'ready' ? 'bg-green-500 text-white' : ''}>
+                         className={systemStatus.model === 'ready' ? 'bg-blue-500 text-white' : ''}>
                         {systemStatus.model}
                       </Badge>
                     </div>
                     <div className="flex justify-between py-1">
-                      <span className="text-indigo-700">Processing</span>
-                      <Badge variant={systemStatus.processing === 'active' ? 'default' : 'outline'} className={systemStatus.processing === 'active' ? 'bg-indigo-500 hover:bg-indigo-600' : ''}>
+                      <span className="text-blue-700">Processing</span>
+                      <Badge variant={systemStatus.processing === 'active' ? 'default' : 'outline'} className={systemStatus.processing === 'active' ? 'bg-blue-500 hover:bg-blue-600' : ''}>
                         {systemStatus.processing}
                       </Badge>
                     </div>
-                    <div className="mt-3 pt-3 border-t border-indigo-100">
-                      <h3 className="text-sm font-medium mb-2 text-indigo-700">System Controls</h3>
+                    <div className="mt-3 pt-3 border-t border-blue-100">
+                      <h3 className="text-sm font-medium mb-2 text-blue-700">System Controls</h3>
                       <div className="flex flex-wrap gap-2">
-                        <Button variant="outline" size="sm" className="border-indigo-200 text-indigo-700 hover:bg-indigo-50">
+                        <Button variant="outline" size="sm" className="border-blue-200 text-blue-700 hover:bg-blue-50">
                           <Video className="h-3 w-3 mr-1" />
                           Reset Camera
                         </Button>
-                        <Button variant="outline" size="sm" className="border-indigo-200 text-indigo-700 hover:bg-indigo-50">
+                        <Button variant="outline" size="sm" className="border-blue-200 text-blue-700 hover:bg-blue-50">
                           <Settings className="h-3 w-3 mr-1" />
                           Settings
                         </Button>
@@ -384,44 +414,44 @@ export default function HomePage() {
                 </Card>
                 
                 {/* Debug Info Card */}
-                <Card className="shadow-md border border-indigo-100">
-                  <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-3 border-b flex items-center gap-2 text-white">
+                <Card className="shadow-md border border-blue-100">
+                  <div className="bg-gradient-to-r from-blue-700 to-blue-900 p-3 border-b flex items-center gap-2 text-white">
                     <Activity className="h-4 w-4" />
                     <h4 className="font-medium">Debug Info</h4>
                   </div>
                   <div className="p-4 space-y-2">
-                    <div className="flex justify-between py-1 border-b border-indigo-100">
-                      <span className="text-indigo-700">Hand Detected</span>
+                    <div className="flex justify-between py-1 border-b border-blue-100">
+                      <span className="text-blue-700">Hand Detected</span>
                       <Badge 
                         variant={handDetected ? 'default' : 'destructive'}
-                        className={handDetected ? 'bg-green-500 text-white' : ''}
+                        className={handDetected ? 'bg-blue-500 text-white' : ''}
                       >
                         {handDetected ? 'Yes' : 'No'}
                       </Badge>
                     </div>
                     
-                    <div className="flex justify-between py-1 border-b border-indigo-100">
-                      <span className="text-indigo-700">Hand Confidence</span>
-                      <span className="font-medium text-indigo-900">{(detectionResult.confidence * 100).toFixed(1)}%</span>
+                    <div className="flex justify-between py-1 border-b border-blue-100">
+                      <span className="text-blue-700">Hand Confidence</span>
+                      <span className="font-medium text-blue-900">{(detectionResult.confidence * 100).toFixed(1)}%</span>
                     </div>
                     
-                    <div className="flex justify-between py-1 border-b border-indigo-100">
-                      <span className="text-indigo-700">Landmarks</span>
-                      <span className="font-medium text-indigo-900">{landmarks}</span>
+                    <div className="flex justify-between py-1 border-b border-blue-100">
+                      <span className="text-blue-700">Landmarks</span>
+                      <span className="font-medium text-blue-900">{landmarks}</span>
                     </div>
                     
                     <div className="mt-2">
-                      <h3 className="text-sm font-medium mb-2 text-indigo-700">Log Events</h3>
-                      <div className="bg-indigo-50 p-2 rounded-md font-mono text-xs h-24 overflow-y-auto">
+                      <h3 className="text-sm font-medium mb-2 text-blue-700">Log Events</h3>
+                      <div className="bg-blue-50 p-2 rounded-md font-mono text-xs h-24 overflow-y-auto">
                         <div className="text-green-600">[INFO] Model loaded successfully</div>
-                        <div className="text-indigo-600">[DEBUG] Camera {systemStatus.camera}</div>
-                        <div className="text-indigo-600">[DEBUG] MediaPipe Hands model initialized</div>
+                        <div className="text-blue-600">[DEBUG] Camera {systemStatus.camera}</div>
+                        <div className="text-blue-600">[DEBUG] MediaPipe Hands model initialized</div>
                         {detectionResult.confidence < 0.5 && (
                           <div className="text-orange-500">[WARN] Low detection confidence: {(detectionResult.confidence * 100).toFixed(1)}%</div>
                         )}
-                        <div className="text-indigo-600">[DEBUG] Processing at {detectionResult.fps.toFixed(1)}fps</div>
+                        <div className="text-blue-600">[DEBUG] Processing at {detectionResult.fps.toFixed(1)}fps</div>
                         {landmarks > 0 && (
-                          <div className="text-indigo-600">[DEBUG] {landmarks} landmarks detected</div>
+                          <div className="text-blue-600">[DEBUG] {landmarks} landmarks detected</div>
                         )}
                         {isRecording && (
                           <div className="text-red-500">[INFO] Recording active: {recordingDuration}s, {recordedSigns.length} signs</div>
@@ -437,7 +467,7 @@ export default function HomePage() {
           {/* Recorded Signs Card - Only show when there are recorded signs */}
           {recordedSigns.length > 0 && (
             <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-              <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-4 border-b flex items-center justify-between text-white">
+              <div className="bg-gradient-to-r from-blue-800 to-blue-900 p-4 border-b flex items-center justify-between text-white">
                 <div className="flex items-center gap-3">
                   <Save className="h-5 w-5" />
                   <h3 className="text-lg font-medium">Recorded Signs</h3>
@@ -449,28 +479,67 @@ export default function HomePage() {
               <div className="p-4">
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                   {recordedSigns.map((sign, index) => (
-                    <div key={index} className="bg-purple-50 p-2 rounded border border-purple-100 text-center">
-                      <span className="text-purple-800 font-medium">{sign}</span>
+                    <div key={index} className="bg-blue-50 p-2 rounded border border-blue-100 text-center">
+                      <span className="text-blue-800 font-medium">{sign}</span>
                     </div>
                   ))}
                 </div>
                 {isRecording ? (
-                  <div className="mt-4 text-center text-sm text-purple-600">
+                  <div className="mt-4 text-center text-sm text-blue-600">
                     Recording in progress...
+                  </div>
+                ) : showSaveDialog ? (
+                  <div className="mt-4 border border-blue-200 rounded-lg p-4 bg-blue-50">
+                    <h4 className="text-blue-800 font-medium mb-2">Save Your Recording</h4>
+                    <div className="mb-3">
+                      <label className="block text-sm text-blue-700 mb-1">Recording Name</label>
+                      <input 
+                        type="text"
+                        value={recordingName}
+                        onChange={(e) => setRecordingName(e.target.value)}
+                        placeholder={recordingToSave?.title || "Sign Detection Session"}
+                        className="w-full p-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div className="mb-2">
+                      <p className="text-sm text-blue-600 mb-1">
+                        <span className="font-medium">Signs detected:</span> {recordedSigns.length}
+                      </p>
+                      <p className="text-sm text-blue-600 mb-1">
+                        <span className="font-medium">Duration:</span> {formatTime(recordingDuration)}
+                      </p>
+                    </div>
+                    <div className="flex justify-between gap-2 mt-4">
+                      <Button 
+                        variant="outline" 
+                        className="border-red-200 text-red-600 hover:bg-red-50 flex-1"
+                        onClick={handleDiscardRecording}
+                      >
+                        Discard
+                      </Button>
+                      <Button 
+                        variant="default" 
+                        className="bg-blue-600 hover:bg-blue-700 flex-1"
+                        onClick={handleSaveRecording}
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        Save & View Recordings
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <div className="mt-4 flex justify-center gap-2">
                     <Button 
                       variant="outline" 
-                      className="border-purple-200 text-purple-700 hover:bg-purple-50"
-                      onClick={handleStopRecording}
+                      className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                      onClick={() => setShowSaveDialog(true)}
                     >
                       <Save className="h-4 w-4 mr-2" />
                       Save Session
                     </Button>
                     <Button 
                       variant="default" 
-                      className="bg-purple-600 hover:bg-purple-700"
+                      className="bg-blue-600 hover:bg-blue-700"
                       onClick={() => router.push('/recordings')}
                     >
                       <Video className="h-4 w-4 mr-2" />
@@ -484,59 +553,59 @@ export default function HomePage() {
           
           {/* Analytics Dashboard */}
           <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-            <div className="bg-gradient-to-r from-violet-600 to-indigo-700 p-4 border-b flex items-center gap-3 text-white">
+            <div className="bg-gradient-to-r from-blue-800 to-blue-900 p-4 border-b flex items-center gap-3 text-white">
               <BarChart2 className="h-5 w-5" />
               <h3 className="text-lg font-medium">Analytics Dashboard</h3>
             </div>
             <div className="p-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-medium mb-4 text-indigo-800">Detection Statistics</h3>
+                  <h3 className="text-lg font-medium mb-4 text-blue-800">Detection Statistics</h3>
                   <div className="space-y-4">
                     <div>
                       <div className="flex justify-between mb-1">
-                        <span className="text-sm text-indigo-600">Success Rate</span>
-                        <span className="text-sm text-indigo-600">85%</span>
+                        <span className="text-sm text-blue-600">Success Rate</span>
+                        <span className="text-sm text-blue-600">85%</span>
                       </div>
-                      <Progress value={85} className="h-2 bg-indigo-100" />
+                      <Progress value={85} className="h-2 bg-blue-100" />
                     </div>
                     
                     <div>
                       <div className="flex justify-between mb-1">
-                        <span className="text-sm text-indigo-600">Average Confidence</span>
-                        <span className="text-sm text-indigo-600">78%</span>
+                        <span className="text-sm text-blue-600">Average Confidence</span>
+                        <span className="text-sm text-blue-600">78%</span>
                       </div>
-                      <Progress value={78} className="h-2 bg-indigo-100" />
+                      <Progress value={78} className="h-2 bg-blue-100" />
                     </div>
                     
                     <div>
                       <div className="flex justify-between mb-1">
-                        <span className="text-sm text-indigo-600">Detection Speed</span>
-                        <span className="text-sm text-indigo-600">92%</span>
+                        <span className="text-sm text-blue-600">Detection Speed</span>
+                        <span className="text-sm text-blue-600">92%</span>
                       </div>
-                      <Progress value={92} className="h-2 bg-indigo-100" />
+                      <Progress value={92} className="h-2 bg-blue-100" />
                     </div>
                   </div>
                 </div>
                 
                 <div>
-                  <h3 className="text-lg font-medium mb-4 text-indigo-800">Top Detected Signs</h3>
+                  <h3 className="text-lg font-medium mb-4 text-blue-800">Top Detected Signs</h3>
                   <div className="space-y-2">
-                    <div className="p-2 bg-indigo-50 rounded-md flex justify-between items-center">
-                      <span className="text-indigo-700">Hello</span>
-                      <Badge variant="outline" className="border-indigo-400 text-indigo-600">124 times</Badge>
+                    <div className="p-2 bg-blue-50 rounded-md flex justify-between items-center">
+                      <span className="text-blue-700">Hello</span>
+                      <Badge variant="outline" className="border-blue-400 text-blue-600">124 times</Badge>
                     </div>
-                    <div className="p-2 bg-indigo-50 rounded-md flex justify-between items-center">
-                      <span className="text-indigo-700">Thank you</span>
-                      <Badge variant="outline" className="border-indigo-400 text-indigo-600">98 times</Badge>
+                    <div className="p-2 bg-blue-50 rounded-md flex justify-between items-center">
+                      <span className="text-blue-700">Thank you</span>
+                      <Badge variant="outline" className="border-blue-400 text-blue-600">98 times</Badge>
                     </div>
-                    <div className="p-2 bg-indigo-50 rounded-md flex justify-between items-center">
-                      <span className="text-indigo-700">Yes</span>
-                      <Badge variant="outline" className="border-indigo-400 text-indigo-600">87 times</Badge>
+                    <div className="p-2 bg-blue-50 rounded-md flex justify-between items-center">
+                      <span className="text-blue-700">Yes</span>
+                      <Badge variant="outline" className="border-blue-400 text-blue-600">87 times</Badge>
                     </div>
-                    <div className="p-2 bg-indigo-50 rounded-md flex justify-between items-center">
-                      <span className="text-indigo-700">No</span>
-                      <Badge variant="outline" className="border-indigo-400 text-indigo-600">76 times</Badge>
+                    <div className="p-2 bg-blue-50 rounded-md flex justify-between items-center">
+                      <span className="text-blue-700">No</span>
+                      <Badge variant="outline" className="border-blue-400 text-blue-600">76 times</Badge>
                     </div>
                   </div>
                 </div>
@@ -548,7 +617,7 @@ export default function HomePage() {
         {/* Interaction Panel */}
         <div className="space-y-8">
           <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 border-b flex items-center gap-3 text-white">
+            <div className="bg-gradient-to-r from-blue-800 to-blue-900 p-4 border-b flex items-center gap-3 text-white">
               <Mic className="h-5 w-5" />
               <h3 className="text-lg font-medium">Audio to Sign</h3>
             </div>
@@ -558,7 +627,7 @@ export default function HomePage() {
           </Card>
 
           <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 border-b flex items-center gap-3 text-white">
+            <div className="bg-gradient-to-r from-blue-800 to-blue-900 p-4 border-b flex items-center gap-3 text-white">
               <Send className="h-5 w-5" />
               <h3 className="text-lg font-medium">Conversation</h3>
             </div>
@@ -568,7 +637,7 @@ export default function HomePage() {
           </Card>
 
           <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 border-b flex items-center gap-3 text-white">
+            <div className="bg-gradient-to-r from-blue-800 to-blue-900 p-4 border-b flex items-center gap-3 text-white">
               <Languages className="h-5 w-5" />
               <h3 className="text-lg font-medium">Text to Sign</h3>
             </div>
@@ -579,31 +648,31 @@ export default function HomePage() {
 
           {/* Quick Tools Section */}
           <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 border-b flex items-center gap-3 text-white">
+            <div className="bg-gradient-to-r from-blue-800 to-blue-900 p-4 border-b flex items-center gap-3 text-white">
               <Layers className="h-5 w-5" />
               <h3 className="text-lg font-medium">Quick Tools</h3>
             </div>
             <div className="p-4 grid grid-cols-2 gap-3">
               <Link href="/dictionary">
-                <Button variant="outline" className="w-full border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 flex items-center justify-center gap-2">
+                <Button variant="outline" className="w-full border-blue-200 hover:bg-blue-50 hover:text-blue-700 flex items-center justify-center gap-2">
                   <Book className="h-4 w-4" />
                   <span>Dictionary</span>
                 </Button>
               </Link>
               <Link href="/translate">
-                <Button variant="outline" className="w-full border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 flex items-center justify-center gap-2">
+                <Button variant="outline" className="w-full border-blue-200 hover:bg-blue-50 hover:text-blue-700 flex items-center justify-center gap-2">
                   <Languages className="h-4 w-4" />
                   <span>Translate</span>
                 </Button>
               </Link>
               <Link href="/recordings">
-                <Button variant="outline" className="w-full border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 flex items-center justify-center gap-2">
+                <Button variant="outline" className="w-full border-blue-200 hover:bg-blue-50 hover:text-blue-700 flex items-center justify-center gap-2">
                   <Video className="h-4 w-4" />
                   <span>Recordings</span>
                 </Button>
               </Link>
               <Link href="/analytics">
-                <Button variant="outline" className="w-full border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 flex items-center justify-center gap-2">
+                <Button variant="outline" className="w-full border-blue-200 hover:bg-blue-50 hover:text-blue-700 flex items-center justify-center gap-2">
                   <BarChart2 className="h-4 w-4" />
                   <span>Analytics</span>
                 </Button>
@@ -612,14 +681,14 @@ export default function HomePage() {
           </Card>
 
           {/* Feature Card */}
-          <Card className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white overflow-hidden relative shadow-lg">
+          <Card className="bg-gradient-to-r from-blue-800 to-blue-900 text-white overflow-hidden relative shadow-lg">
             <div className="absolute inset-0 bg-black opacity-10 rounded-lg"></div>
             <div className="p-6 relative z-10">
               <h3 className="text-xl font-bold mb-2">Try Our New Features</h3>
               <p className="mb-4 opacity-90">
                 Explore all the capabilities of our Sign Language Analysis Tool.
               </p>
-              <Button className="bg-white text-indigo-700 hover:bg-gray-100 shadow-md">
+              <Button className="bg-white text-blue-700 hover:bg-gray-100 shadow-md">
                 <Layers className="h-4 w-4 mr-2" />
                 View All Features
               </Button>
