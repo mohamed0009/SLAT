@@ -16,6 +16,7 @@ import { AudioToSign } from "@/components/audio-to-sign/AudioToSign";
 import { Badge } from "@/components/ui/badge"
 import { WelcomeBanner } from '@/components/welcome-banner';
 import { Progress } from "@/components/ui/progress"
+import { toast } from "@/hooks/use-toast"
 
 interface DetectionResult {
   gesture: string;
@@ -57,6 +58,14 @@ export default function HomePage() {
   const [recordingName, setRecordingName] = useState('');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [recordingToSave, setRecordingToSave] = useState<any>(null);
+  
+  // Video recording refs and states
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const videoStreamRef = useRef<MediaStream | null>(null);
+  const videoPreviewRef = useRef<HTMLVideoElement | null>(null);
+  const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   
   // Timer for recording duration
   useEffect(() => {
@@ -168,11 +177,116 @@ export default function HomePage() {
   }, []);
 
   const handleStartRecording = () => {
+    // Start video recording
+    startVideoRecording();
+    
     setIsRecording(true);
     setRecordedSigns([]);
     setRecordingStartTime(Date.now());
     setRecordingDuration(0);
     setShowSaveDialog(false);
+  };
+
+  // Start video recording from webcam
+  const startVideoRecording = () => {
+    try {
+      // Get the active webcam stream that's already being used
+      const videoStream = document.querySelector('video')?.srcObject as MediaStream;
+      
+      if (!videoStream) {
+        console.error('No active webcam stream found');
+        toast({
+          title: "Recording Error",
+          description: "No camera stream available. Please ensure your camera is enabled.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Save the stream reference
+      videoStreamRef.current = videoStream;
+      
+      // Try to use a widely supported MIME type
+      let mimeType = 'video/webm';
+      const supportedTypes = [
+        'video/webm;codecs=vp9',
+        'video/webm;codecs=vp8',
+        'video/webm',
+        'video/mp4'
+      ];
+      
+      for (const type of supportedTypes) {
+        if (MediaRecorder.isTypeSupported(type)) {
+          mimeType = type;
+          console.log(`Using MIME type: ${mimeType}`);
+          break;
+        }
+      }
+      
+      // Create a new MediaRecorder instance
+      const mediaRecorder = new MediaRecorder(videoStream, { 
+        mimeType,
+        videoBitsPerSecond: 2500000 // 2.5 Mbps
+      });
+      
+      // Clear any previous recorded chunks
+      recordedChunksRef.current = [];
+      
+      // Add event listeners
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          recordedChunksRef.current.push(event.data);
+        }
+      };
+      
+      // Start recording
+      mediaRecorder.start(1000); // Collect data every second
+      mediaRecorderRef.current = mediaRecorder;
+      
+      console.log('Video recording started');
+    } catch (error) {
+      console.error('Error starting video recording:', error);
+      toast({
+        title: "Recording Error",
+        description: "Failed to start video recording. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  // Stop video recording and process the video
+  const stopVideoRecording = () => {
+    if (!mediaRecorderRef.current) {
+      console.warn('No active media recorder found');
+      return null;
+    }
+    
+    return new Promise<Blob>((resolve, reject) => {
+      try {
+        mediaRecorderRef.current!.onstop = () => {
+          // Create a single Blob from all chunks
+          const videoBlob = new Blob(recordedChunksRef.current, { 
+            type: 'video/webm' 
+          });
+          
+          // Create a URL for the blob
+          const url = URL.createObjectURL(videoBlob);
+          setVideoBlob(videoBlob);
+          setVideoUrl(url);
+          
+          console.log(`Video recording stopped, size: ${(videoBlob.size / (1024 * 1024)).toFixed(2)} MB`);
+          
+          // Resolve with the blob
+          resolve(videoBlob);
+        };
+        
+        // Stop recording
+        mediaRecorderRef.current!.stop();
+      } catch (error) {
+        console.error('Error stopping video recording:', error);
+        reject(error);
+      }
+    });
   };
 
   // Format time for recording display
@@ -184,85 +298,232 @@ export default function HomePage() {
 
   const handleStopRecording = async () => {
     setIsRecording(false);
+    console.log("Recording stopped, creating save dialog");
     
-    // Create recording data
-    if (recordedSigns.length > 0) {
-      try {
-        // Create a recording object that matches the format used in the recordings page
-        const today = new Date();
-        const dateStr = today.toISOString().split('T')[0];
-        const timeStr = today.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
-        // Calculate size based on data length (this is an approximation)
-        const dataSize = JSON.stringify(recordedSigns).length / 1024; // KB
-        const formattedSize = dataSize > 1024 ? `${(dataSize / 1024).toFixed(1)} MB` : `${dataSize.toFixed(1)} KB`;
-        
-        // Create the recording object
-        const recordingData = {
-          id: Date.now(), // Unique ID based on timestamp
-          title: `Sign Detection Session ${today.toLocaleDateString()}`,
-          date: dateStr,
-          time: timeStr,
-          duration: formatTime(recordingDuration),
-          size: formattedSize,
-          category: "Sign Detection",
-          thumbnail: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-          videoUrl: "",
-          signs: recordedSigns, // Store the detected signs
-          timestamp: today.toISOString()
-        };
-        
-        // Set the recording to save and show dialog
-        setRecordingToSave(recordingData);
-        setShowSaveDialog(true);
-        
-      } catch (error) {
-        console.error('Failed to prepare recording:', error);
-      }
+    try {
+      // Stop video recording and get the recorded blob
+      const videoBlob = await stopVideoRecording();
+      
+      // Create a recording object that matches the format used in the recordings page
+      const today = new Date();
+      const dateStr = today.toISOString().split('T')[0];
+      const timeStr = today.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      // Calculate size based on video size
+      const dataSize = videoBlob ? videoBlob.size / 1024 : 0; // KB
+      const formattedSize = dataSize > 1024 ? `${(dataSize / 1024).toFixed(1)} MB` : `${dataSize.toFixed(1)} KB`;
+      
+      // Create the recording object
+      const recordingData = {
+        id: Date.now(), // Unique ID based on timestamp
+        title: `Sign Detection Session ${today.toLocaleDateString()}`,
+        date: dateStr,
+        time: timeStr,
+        duration: formatTime(recordingDuration),
+        size: formattedSize,
+        category: "Sign Detection",
+        thumbnail: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+        videoUrl: videoUrl || "",
+        signs: recordedSigns.length > 0 ? recordedSigns : ['No signs detected'], // Store detected signs or placeholder
+        timestamp: today.toISOString()
+      };
+      
+      // Set the recording to save and show dialog
+      setRecordingToSave(recordingData);
+      setShowSaveDialog(true);
+      console.log("Save dialog should be visible now", {showSaveDialog: true, recordingData});
+      
+    } catch (error) {
+      console.error('Failed to prepare recording:', error);
+      toast({
+        title: "Recording Error",
+        description: "Failed to process the recorded video. Please try again.",
+        variant: "destructive",
+      });
     }
   };
   
   const handleSaveRecording = () => {
-    if (recordingToSave) {
+    if (recordingToSave && videoBlob) {
       try {
+        console.log("Saving recording with video...");
+        
         // Update title if custom name provided
         if (recordingName.trim()) {
           recordingToSave.title = recordingName.trim();
         }
         
-        // Load existing recordings
-        const existingRecordings = JSON.parse(localStorage.getItem('userRecordings') || '[]');
+        // Convert video blob to data URL
+        const reader = new FileReader();
+        reader.readAsDataURL(videoBlob);
+        reader.onloadend = () => {
+          const base64data = reader.result as string;
+          
+          // Store video data separately to avoid localStorage size limits
+          const videoKey = `video_${recordingToSave.id}`;
+          localStorage.setItem(videoKey, base64data);
+          
+          // Load existing recordings
+          let existingRecordings = [];
+          try {
+            const storedRecordings = localStorage.getItem('userRecordings');
+            existingRecordings = storedRecordings ? JSON.parse(storedRecordings) : [];
+            
+            // Validate that we got an array
+            if (!Array.isArray(existingRecordings)) {
+              console.warn('Stored recordings was not an array, resetting');
+              existingRecordings = [];
+            }
+          } catch (parseError) {
+            console.error('Failed to parse existing recordings:', parseError);
+            existingRecordings = [];
+          }
+          
+          // Add new recording to the list
+          existingRecordings.push(recordingToSave);
+          
+          // Save back to localStorage
+          localStorage.setItem('userRecordings', JSON.stringify(existingRecordings));
+          
+          // Confirm the save with a console message
+          console.log(`Successfully saved recording with ${recordedSigns.length} signs and video to storage`);
+          
+          // Clean up
+          if (videoUrl) {
+            URL.revokeObjectURL(videoUrl);
+            setVideoUrl(null);
+          }
+          setVideoBlob(null);
+          
+          // Reset state
+          setShowSaveDialog(false);
+          setRecordingName('');
+          setRecordedSigns([]);
+          
+          // Navigate to the recordings page
+          router.push('/recordings');
+        };
         
-        // Add new recording to the list
-        existingRecordings.push(recordingToSave);
-        
-        // Save back to localStorage
-        localStorage.setItem('userRecordings', JSON.stringify(existingRecordings));
-        
-        // Confirm the save with a console message
-        console.log(`Saved ${recordedSigns.length} signs to userRecordings storage`);
-        
-        // Reset state
-        setShowSaveDialog(false);
-        setRecordingName('');
-        
-        // Navigate to the recordings page
-        router.push('/recordings');
       } catch (error) {
         console.error('Failed to save recording:', error);
+        
+        // Show error but keep dialog open
+        toast({
+          title: "Error",
+          description: "Failed to save recording. Please try again.",
+          variant: "destructive",
+        });
       }
+    } else {
+      console.error('No recording data or video to save');
+      toast({
+        title: "Error",
+        description: "No video data available to save.",
+        variant: "destructive",
+      });
     }
   };
   
   const handleDiscardRecording = () => {
+    console.log("Discarding recording...");
+    
+    // Confirm before discarding if there are signs recorded
+    if (recordedSigns.length > 3) {
+      if (!confirm(`Are you sure you want to discard this recording with ${recordedSigns.length} signs?`)) {
+        return; // User cancelled the discard operation
+      }
+    }
+    
+    // Clean up video resources
+    if (videoUrl) {
+      URL.revokeObjectURL(videoUrl);
+      setVideoUrl(null);
+    }
+    setVideoBlob(null);
+    
+    // Reset recording state
     setRecordedSigns([]);
     setShowSaveDialog(false);
     setRecordingName('');
+    setRecordingToSave(null);
+    
+    console.log("Recording discarded");
   };
 
   return (
     <div className="max-w-7xl mx-auto p-6">
       <WelcomeBanner />
+
+      {/* Save Dialog - Standalone component that appears regardless of recorded signs */}
+      {showSaveDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="max-w-lg w-full bg-white shadow-xl animate-in fade-in slide-in-from-bottom-10 duration-300">
+            <div className="bg-gradient-to-r from-blue-800 to-blue-900 p-4 border-b flex items-center gap-3 text-white">
+              <Save className="h-5 w-5" />
+              <h3 className="text-lg font-medium">Save Your Recording</h3>
+            </div>
+            <div className="p-6">
+              {/* Video Preview */}
+              {videoUrl && (
+                <div className="mb-6 overflow-hidden rounded-lg border-2 border-blue-100 bg-black">
+                  <video 
+                    ref={videoPreviewRef}
+                    src={videoUrl} 
+                    className="w-full h-48 object-cover"
+                    controls
+                    autoPlay={false}
+                  />
+                </div>
+              )}
+              
+              <div className="mb-4">
+                <label className="block text-sm text-blue-700 mb-1 font-medium">Recording Name</label>
+                <input 
+                  type="text"
+                  value={recordingName}
+                  onChange={(e) => setRecordingName(e.target.value)}
+                  placeholder={recordingToSave?.title || "Sign Detection Session"}
+                  className="w-full p-3 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  autoFocus
+                />
+              </div>
+              <div className="mb-4 bg-blue-50 p-3 rounded-md">
+                <p className="text-sm text-blue-700 mb-2">
+                  <span className="font-medium">Signs detected:</span> {recordedSigns.length}
+                </p>
+                <p className="text-sm text-blue-700 mb-2">
+                  <span className="font-medium">Duration:</span> {formatTime(recordingDuration)}
+                </p>
+                <p className="text-sm text-blue-700">
+                  <span className="font-medium">Date:</span> {new Date().toLocaleDateString()}
+                </p>
+                {videoBlob && (
+                  <p className="text-sm text-blue-700 mt-2">
+                    <span className="font-medium">Video size:</span> {(videoBlob.size / (1024 * 1024)).toFixed(2)} MB
+                  </p>
+                )}
+              </div>
+              <div className="flex justify-between gap-3 mt-6">
+                <Button 
+                  variant="outline" 
+                  className="border-red-200 text-red-600 hover:bg-red-50 flex-1"
+                  onClick={handleDiscardRecording}
+                >
+                  Discard
+                </Button>
+                <Button 
+                  variant="default" 
+                  className="bg-blue-600 hover:bg-blue-700 flex-1"
+                  onClick={handleSaveRecording}
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  Save & View Recordings
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Video Container */}
@@ -488,63 +749,26 @@ export default function HomePage() {
                   <div className="mt-4 text-center text-sm text-blue-600">
                     Recording in progress...
                   </div>
-                ) : showSaveDialog ? (
-                  <div className="mt-4 border border-blue-200 rounded-lg p-4 bg-blue-50">
-                    <h4 className="text-blue-800 font-medium mb-2">Save Your Recording</h4>
-                    <div className="mb-3">
-                      <label className="block text-sm text-blue-700 mb-1">Recording Name</label>
-                      <input 
-                        type="text"
-                        value={recordingName}
-                        onChange={(e) => setRecordingName(e.target.value)}
-                        placeholder={recordingToSave?.title || "Sign Detection Session"}
-                        className="w-full p-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div className="mb-2">
-                      <p className="text-sm text-blue-600 mb-1">
-                        <span className="font-medium">Signs detected:</span> {recordedSigns.length}
-                      </p>
-                      <p className="text-sm text-blue-600 mb-1">
-                        <span className="font-medium">Duration:</span> {formatTime(recordingDuration)}
-                      </p>
-                    </div>
-                    <div className="flex justify-between gap-2 mt-4">
-                      <Button 
-                        variant="outline" 
-                        className="border-red-200 text-red-600 hover:bg-red-50 flex-1"
-                        onClick={handleDiscardRecording}
-                      >
-                        Discard
-                      </Button>
-                      <Button 
-                        variant="default" 
-                        className="bg-blue-600 hover:bg-blue-700 flex-1"
-                        onClick={handleSaveRecording}
-                      >
-                        <Save className="h-4 w-4 mr-2" />
-                        Save & View Recordings
-                      </Button>
-                    </div>
-                  </div>
                 ) : (
                   <div className="mt-4 flex justify-center gap-2">
                     <Button 
                       variant="outline" 
                       className="border-blue-200 text-blue-700 hover:bg-blue-50"
-                      onClick={() => setShowSaveDialog(true)}
-                    >
-                      <Save className="h-4 w-4 mr-2" />
-                      Save Session
-                    </Button>
-                    <Button 
-                      variant="default" 
-                      className="bg-blue-600 hover:bg-blue-700"
                       onClick={() => router.push('/recordings')}
                     >
                       <Video className="h-4 w-4 mr-2" />
-                      Go to Recordings
+                      View Recordings
                     </Button>
+                    {recordedSigns.length > 0 && (
+                      <Button 
+                        variant="default" 
+                        className="bg-blue-600 hover:bg-blue-700"
+                        onClick={() => setShowSaveDialog(true)}
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Session
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
