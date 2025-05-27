@@ -45,6 +45,10 @@ export default function HomePage() {
   const [handDetected, setHandDetected] = useState(false);
   const [landmarks, setLandmarks] = useState(0);
   
+  // Add refs for tracking detection history
+  const lastDetectedGestureRef = useRef('');
+  const lastDetectionTimeRef = useRef(0);
+  
   // Recording states
   const [isRecording, setIsRecording] = useState(false);
   const [recordedSigns, setRecordedSigns] = useState<string[]>([]);
@@ -116,9 +120,22 @@ export default function HomePage() {
         });
       }
 
-      // Send detection result to conversation component if confidence is high enough
-      if (result.confidence > 0.7 && conversationRef.current) {
+      // Only send detection result to conversation component if:
+      // 1. Confidence is very high (above 0.8)
+      // 2. The gesture is different from the last detected one
+      // 3. We're not detecting too frequently (limit updates)
+      const currentTime = Date.now();
+      const timeSinceLastDetection = currentTime - lastDetectionTimeRef.current;
+      
+      // Only add to conversation if confidence is high enough AND 
+      // either it's a new gesture OR enough time has passed (3 seconds)
+      if (result.confidence > 0.8 && 
+          conversationRef.current && 
+          (result.gesture !== lastDetectedGestureRef.current || timeSinceLastDetection > 3000)) {
+        
         conversationRef.current.handleSignDetection(result.gesture, result.confidence);
+        lastDetectedGestureRef.current = result.gesture;
+        lastDetectionTimeRef.current = currentTime;
       }
     } catch (error) {
       console.error('Frame processing error:', error);

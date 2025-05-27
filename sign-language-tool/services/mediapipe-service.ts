@@ -90,11 +90,11 @@ class MediaPipeService {
         
         // Fallback to global MediaPipe if available
         if (window.mediapipe && window.mediapipe.Hands) {
-          this.hands = new window.mediapipe.Hands({
-            locateFile: (file: string) => {
-              return `https://unpkg.com/@mediapipe/hands@0.4.1675469240/${file}`;
-            }
-          });
+      this.hands = new window.mediapipe.Hands({
+        locateFile: (file: string) => {
+          return `https://unpkg.com/@mediapipe/hands@0.4.1675469240/${file}`;
+        }
+      });
           console.log('✅ MediaPipe Hands created from global window object');
         } else {
           // Last resort - try to load from CDN

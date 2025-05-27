@@ -4,7 +4,7 @@ import React, { forwardRef, useImperativeHandle, useState, useRef, useEffect } f
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MessageCircle, Send } from "lucide-react";
+import { MessageCircle, Send, HandMetal } from "lucide-react";
 import chatbotService from '@/services/chatbot';
 import { ScrollableContainer } from '@/components/ui/scrollable-container';
 
@@ -22,6 +22,7 @@ export const Conversation = forwardRef<ConversationHandle>((_, ref) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [shouldScroll, setShouldScroll] = useState(true);
 
   useEffect(() => {
     // Send welcome message when component mounts
@@ -33,12 +34,18 @@ export const Conversation = forwardRef<ConversationHandle>((_, ref) => {
   }, []);
 
   useEffect(() => {
-    // Scroll to bottom when messages change
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    // Only scroll to bottom when messages change if it's not a detection message
+    // or if shouldScroll is true
+    if (shouldScroll && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, shouldScroll]);
 
   useImperativeHandle(ref, () => ({
     handleSignDetection: (gesture: string, confidence: number) => {
+      // Don't auto-scroll for detection updates
+      setShouldScroll(false);
+      
       setMessages(prev => [...prev, {
         text: `Detected sign: ${gesture} (${(confidence * 100).toFixed(1)}% confidence)`,
         type: 'detection'
@@ -48,6 +55,9 @@ export const Conversation = forwardRef<ConversationHandle>((_, ref) => {
 
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
+
+    // Enable scrolling for user messages
+    setShouldScroll(true);
 
     // Add user message
     const userMessage = { text: inputText, type: 'user' as const };
@@ -67,11 +77,30 @@ export const Conversation = forwardRef<ConversationHandle>((_, ref) => {
     setInputText(suggestion);
   };
 
+  // Manual scroll button to let users see new messages when they want
+  const scrollToBottom = () => {
+    setShouldScroll(true);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <Card className="overflow-hidden">
-      <div className="p-4 border-b flex items-center gap-3">
-        <MessageCircle className="h-5 w-5 text-primary" />
-        <h3 className="text-lg font-medium">SLAT Assistant</h3>
+      <div className="p-4 border-b flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <MessageCircle className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-medium">SLAT Assistant</h3>
+        </div>
+        
+        {/* Show scroll button only when there are detection messages */}
+        {messages.some(m => m.type === 'detection') && (
+          <button 
+            onClick={scrollToBottom}
+            className="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded-md transition-colors flex items-center gap-1"
+          >
+            <HandMetal className="h-3 w-3" /> 
+            <span>View latest signs</span>
+          </button>
+        )}
       </div>
 
       <div className="flex flex-col h-[400px]">
