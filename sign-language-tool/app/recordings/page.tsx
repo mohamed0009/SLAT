@@ -28,22 +28,6 @@ import { ToastAction } from "@/components/ui/toast"
 import { Switch } from "@/components/ui/switch"
 import { createRoot } from "react-dom/client"
 
-// Custom styles for highlighting new recordings
-const customStyles = `
-  @keyframes pulse-highlight {
-    0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
-    70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-  }
-  
-  .highlight-recording {
-    animation: pulse-highlight 2s infinite;
-    border: 2px solid #3b82f6;
-    transform: scale(1.02);
-    transition: all 0.3s ease-in-out;
-  }
-`;
-
 export default function RecordingsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
@@ -988,64 +972,43 @@ export default function RecordingsPage() {
   useEffect(() => {
     // Check URL for recordings from ScreenRecorder
     const checkForNewRecordings = () => {
-      // In a real app, you would fetch recordings from your API
-      // For demo purposes, we'll just check if we were redirected from the screen recorder
-      
+      // Check if we were redirected with a new recording
       const params = new URLSearchParams(window.location.search);
       const newRecording = params.get('newRecording');
+      const newRecordingId = params.get('id');
       
       if (newRecording === 'true') {
         // Clean up URL
         window.history.replaceState({}, document.title, window.location.pathname);
         
-        // Get the last added recording ID
-        const lastAddedId = localStorage.getItem('lastAddedRecordingId');
-        
-        if (lastAddedId) {
-          // Find the recording with this ID
-          const recordingId = parseInt(lastAddedId);
-          const recording = userRecordings.find(r => r.id === recordingId);
-          
-          if (recording) {
-            // Show notification with the actual recording title
+        // Highlight the new recording
+        setTimeout(() => {
+          const recordingElement = document.getElementById(`recording-${newRecordingId}`);
+          if (recordingElement) {
+            // Add highlight class
+            recordingElement.classList.add('highlight-recording');
+            
+            // Scroll to the element
+            recordingElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Show success toast
             toast({
-              title: "Recording Saved",
-              description: `"${recording.title}" has been added to your recordings`,
+              title: "Recording Ready",
+              description: "Your new recording is ready to play!",
               variant: "default",
             });
             
-            // Highlight this recording (scroll to it, etc.)
+            // Remove highlight after 5 seconds
             setTimeout(() => {
-              const element = document.getElementById(`recording-${recordingId}`);
-              if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                element.classList.add('highlight-recording');
-                setTimeout(() => {
-                  element.classList.remove('highlight-recording');
-                }, 3000);
-              }
-            }, 500);
-          } else {
-            // Generic notification if recording not found
-            toast({
-              title: "New Recording Available",
-              description: "Your screen recording has been added to your library",
-              variant: "default",
-            });
+              recordingElement.classList.remove('highlight-recording');
+            }, 5000);
           }
-        } else {
-          // Generic notification if no recording ID found
-          toast({
-            title: "New Recording Available",
-            description: "Your screen recording has been added to your library",
-            variant: "default",
-          });
-        }
+        }, 500);
       }
     };
     
     checkForNewRecordings();
-  }, [userRecordings]);
+  }, []);
 
   // Clean up blob URLs when component unmounts
   useEffect(() => {
@@ -1056,6 +1019,39 @@ export default function RecordingsPage() {
           URL.revokeObjectURL(recording.videoUrl);
         }
       });
+    };
+  }, []);
+
+  // Add inline styles for the highlight animation
+  useEffect(() => {
+    // Add the custom CSS to the document head
+    const styleId = 'recording-highlight-styles';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = `
+        @keyframes pulse-highlight {
+          0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+          70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        
+        .highlight-recording {
+          animation: pulse-highlight 2s infinite;
+          border: 2px solid #3b82f6 !important;
+          transform: scale(1.02);
+          transition: all 0.3s ease-in-out;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    // Clean up when component unmounts
+    return () => {
+      const styleElement = document.getElementById(styleId);
+      if (styleElement) {
+        styleElement.remove();
+      }
     };
   }, []);
 
@@ -1628,8 +1624,7 @@ export default function RecordingsPage() {
               <Card 
                 key={recording.id} 
                 id={`recording-${recording.id}`}
-                className="overflow-hidden border-blue-200 shadow-sm hover:shadow-md transition-shadow"
-              >
+                className="overflow-hidden shadow-md hover:shadow-lg transition-shadow border border-slate-200">
               <Dialog>
                 <DialogTrigger asChild>
                   <div className="relative cursor-pointer group">

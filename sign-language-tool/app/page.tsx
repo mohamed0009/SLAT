@@ -353,6 +353,12 @@ export default function HomePage() {
           recordingToSave.title = recordingName.trim();
         }
         
+        // Show saving status
+        toast({
+          title: "Saving Recording",
+          description: "Please wait while we save your recording...",
+        });
+        
         // Convert video blob to data URL
         const reader = new FileReader();
         reader.readAsDataURL(videoBlob);
@@ -388,6 +394,13 @@ export default function HomePage() {
           // Confirm the save with a console message
           console.log(`Successfully saved recording with ${recordedSigns.length} signs and video to storage`);
           
+          // Show success message
+          toast({
+            title: "Recording Saved",
+            description: "Your recording has been saved successfully!",
+            variant: "default",
+          });
+          
           // Clean up
           if (videoUrl) {
             URL.revokeObjectURL(videoUrl);
@@ -400,8 +413,10 @@ export default function HomePage() {
           setRecordingName('');
           setRecordedSigns([]);
           
-          // Navigate to the recordings page
-          router.push('/recordings');
+          // Navigate to the recordings page with a small delay to allow toast to be seen
+          setTimeout(() => {
+            router.push('/recordings?newRecording=true&id=' + recordingToSave.id);
+          }, 1000);
         };
         
       } catch (error) {
